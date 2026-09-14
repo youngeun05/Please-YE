@@ -1,0 +1,6 @@
+# Versions verified on the local Windows/CUDA smoke test (2026-09-11).
+# Install a CUDA-enabled PyTorch build appropriate for the host before this file.
+numpy==2.4.6
+Pillow==11.0.0
+PyYAML==6.0.2
+ultralytics==8.4.108
