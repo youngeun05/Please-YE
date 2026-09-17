@@ -215,6 +215,35 @@ GPU 기준 epoch 시간은 전부 0.3~1.4분이라 **연산이 병목이 아닙�
 첫 epoch은 디스크가 병목입니다. RAM이 31.7GB이므로 1280×384 기준 5,481장 캐시가 약 8GB로
 `cache='ram'`이 들어갑니다 — 본 학습 때 검토하세요.
 
+## Baseline (2026-09-17)
+
+양자화의 비교 기준이 되는 최초 baseline입니다.
+
+```powershell
+python .\scripts\train_baseline.py --variant exact3 --model yolo11n.pt --imgsz 1248 --batch 32 --epochs 100 --workers 0
+python .\scripts\predict_kitti.py --weights .\runs\baseline\yolo11n_exact3_1248\weights\best.pt --split .\splits\internal_val.txt --output .\runs\predictions\baseline_internal_val --imgsz 1248x384
+python .\scripts\evaluate_kitti.py --kitti-root D:\datasets\KITTI --split .\splits\internal_val.txt --predictions .\runs\predictions\baseline_internal_val --output .\runs\metrics_baseline_internal_val.json
+```
+
+| 항목 | 값 |
+|---|---|
+| 모델 | YOLO11n, COCO 사전학습에서 451/499 항목 이식, nc=3 |
+| 해상도 | 학습 1248×384 (rect), 예측·평가 1248×384 고정 |
+| 파라미터 / 가중치 크기 | 2,582,737 (fused) / 5.26 MB |
+| 학습 | 100 epoch, batch 32, AdamW(auto, lr 0.001429), seed 20260917, 2.88시간 |
+| **Moderate AP40 (internal_val)** | **Car 98.08 / Pedestrian 93.70 / Cyclist 94.99 → 평균 95.59** |
+| Easy / Hard 평균 | 96.63 / 93.95 |
+
+**주의할 점 두 가지.**
+
+1. **아직 수렴하지 않았습니다.** best epoch이 100 중 99번째라 epoch을 늘리면 더 오를 여지가 있습니다.
+2. **`rect=True`는 mosaic·mixup·cutmix를 강제로 끕니다** (`ultralytics/data/dataset.py`의
+   `hyp.mosaic = hyp.mosaic if self.augment and not self.rect else 0.0`). 로그에는 `mosaic=1.0`으로
+   찍히지만 적용되지 않습니다. 증강을 살린 정사각형 학습과의 A/B는 아직 안 했습니다.
+
+이 수치는 **internal_val 기준**입니다. `eval_val.txt`는 공식 채점셋이므로 최종 보고 시점에 한 번만
+측정하고, 그 전의 모든 선택(하이퍼파라미터·증강·모델)은 internal_val로만 판단해야 합니다.
+
 ## 아직 레포에 없는 것 (예선 제출에 필요)
 
 1. **양자화 파이프라인** — 예선 배점의 절반이 여기에 걸려 있는데 코드가 없습니다.
