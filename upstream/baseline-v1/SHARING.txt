@@ -1,0 +1,15 @@
+Please-YE baseline-v1 source package
+Upstream: https://github.com/youngeun05/Please-YE
+Base commit: 3385447eb481dea1655094d9be0e8e94e37a65f2
+Includes local baseline-v1 changes. No .git history is included.
+
+Start with README.md. Use the extracted folder as the project root.
+Install CUDA-compatible PyTorch and requirements-tested.txt.
+KITTI images/labels, generated datasets, local YAML, weights and results are NOT included.
+Create the image junction and rerun conversion using the recipient machine's paths.
+Use the included fixed splits; do not regenerate them for comparison.
+For AP40 evaluation, run scripts/setup_evaluator.ps1 (Git and network required).
+Pretrained training weights may require an initial download.
+
+Validated: 4 CPU contract tests, Python syntax and 3 CLI help commands.
+Actual GPU training/inference/benchmark has not been validated on this host.

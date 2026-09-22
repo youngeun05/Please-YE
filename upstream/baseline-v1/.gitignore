@@ -1,0 +1,34 @@
+# Local datasets and generated caches
+data/
+datasets/
+*.cache
+
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Training and export artifacts
+runs/
+artifacts/
+*.pt
+*.pth
+*.onnx
+*.engine
+*.har
+*.hef
+
+# Local-only path and environment settings
+.env
+*.local.yaml
+
+# Reproducibly downloaded reference evaluator (see scripts/setup_evaluator.ps1)
+third_party/mmdetection3d/
+*.local.yml
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
