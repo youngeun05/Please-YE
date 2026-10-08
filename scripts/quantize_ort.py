@@ -17,10 +17,16 @@ Design decisions (each one is something the report should state):
 * Weights INT8 symmetric, per output channel by default; activations UINT8
   asymmetric. Per-channel weights matter for conv nets whose channels have very
   different ranges after BN folding.
-* --keep-head-fp32 leaves the box-decoding tail of the Detect head in float
-  (DFL, Sigmoid, Concat, the anchor arithmetic). The head's own convolutions
-  stay INT8. Run with and without it: the difference in AP40 is a result for
-  the report, not something to assume.
+* The box-decoding tail of the Detect head stays float by default (DFL,
+  Sigmoid, Concat, the anchor arithmetic); the head's own convolutions are INT8.
+  Reason: the final Concat packs pixel coordinates (0..~1300) and class scores
+  (0..1) into one tensor. A single UINT8 scale over that range is ~5 px per
+  step, so every score rounds to 0 and the model detects nothing (reproduced on
+  a small model with the same structure: scores 0.07..0.47 became all 0; with
+  the tail in float they stayed 0.07..0.46). This is also how Hailo deploys
+  YOLO: convolutions on the NPU, decoding/NMS on the host CPU.
+  --quantize-head quantizes the tail too; keep it only as the control
+  experiment that shows this failure.
 
 Calibration method: minmax (default), entropy or percentile.
 ONNX Runtime keeps every intermediate tensor of every image it has seen in RAM
@@ -57,8 +63,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--method", choices=("minmax", "entropy", "percentile"), default="minmax")
     parser.add_argument("--percentile", type=float, default=99.999, help="only for --method percentile")
     parser.add_argument("--per-tensor", action="store_true", help="per-tensor weights instead of per-channel")
-    parser.add_argument("--keep-head-fp32", action="store_true",
-                        help="exclude the Detect head's box-decoding nodes from quantization")
+    parser.add_argument("--quantize-head", action="store_true",
+                        help="ALSO quantize the Detect head's decoding tail (control experiment only: "
+                             "scores collapse to 0, see the module docstring)")
     parser.add_argument("--exclude-nodes", nargs="*", default=[], help="extra node names to keep in float")
     parser.add_argument("--limit", type=int, default=None,
                         help="use only the first N calibration ids (sorted), for quick trials")
@@ -136,8 +143,8 @@ def head_decode_nodes(model_path: Path) -> list[str]:
     pattern = re.compile(r"^/model\.(\d+)/")
     indices = [int(match.group(1)) for node in model.graph.node if (match := pattern.match(node.name))]
     if not indices:
-        raise SystemExit("--keep-head-fp32: node names do not follow the Ultralytics '/model.N/' scheme; "
-                         "pass the names with --exclude-nodes instead")
+        raise SystemExit("Detect head: node names do not follow the Ultralytics '/model.N/' scheme; "
+                         "pass the decoding node names with --exclude-nodes plus --quantize-head")
     prefix = f"/model.{max(indices)}/"
     conv_branch = re.compile(r"/(one2one_)?cv[23]\.")  # box/class conv branches (YOLO11 and YOLO26 names)
     return [node.name for node in model.graph.node
@@ -149,8 +156,8 @@ def default_output(model: Path, args: argparse.Namespace) -> Path:
     tags = ["int8", args.method]
     if args.per_tensor:
         tags.append("pertensor")
-    if args.keep_head_fp32:
-        tags.append("headfp32")
+    if args.quantize_head:
+        tags.append("fullhead")
     if args.limit:
         tags.append(f"n{args.limit}")
     return model.with_name(f"{stem}_{'_'.join(tags)}.onnx")
@@ -197,10 +204,12 @@ def main() -> None:
                       "quantizing the exported graph as is")
 
         excluded = list(args.exclude_nodes)
-        if args.keep_head_fp32:
+        if args.quantize_head:
+            print("head        : decoding tail quantized too (--quantize-head, control experiment)")
+        else:
             head = head_decode_nodes(source)
             excluded.extend(head)
-            print(f"keep-head   : {len(head)} decode nodes stay float")
+            print(f"head        : {len(head)} decoding nodes stay float (convolutions are INT8)")
 
         reader = KittiCalibrationReader(args.kitti_root / "training" / "image_2", ids, input_name, width, height)
         method = {"minmax": CalibrationMethod.MinMax, "entropy": CalibrationMethod.Entropy,
@@ -230,7 +239,7 @@ def main() -> None:
         "method": args.method, "percentile": args.percentile if args.method == "percentile" else None,
         "weights": "int8 symmetric " + ("per-tensor" if args.per_tensor else "per-channel"),
         "activations": "uint8 asymmetric", "format": "QDQ",
-        "keep_head_fp32": args.keep_head_fp32, "excluded_nodes": len(excluded),
+        "head_decode": "int8" if args.quantize_head else "float", "excluded_nodes": len(excluded),
         "calibration_images": len(ids), "calibration_ids_sha256": ids_sha256(ids),
         "calibration_chunk": stride,
         "quant_pre_process": preprocessed,

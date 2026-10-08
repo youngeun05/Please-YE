@@ -28,11 +28,14 @@ python scripts\evaluate_kitti.py --kitti-root D:\datasets\KITTI --split splits\i
 
 ```powershell
 python scripts\quantize_ort.py --model $W\best_1248x384_fp32.onnx --kitti-root D:\datasets\KITTI
-python scripts\quantize_ort.py --model $W\best_1248x384_fp32.onnx --kitti-root D:\datasets\KITTI --keep-head-fp32
+python scripts\quantize_ort.py --model $W\best_1248x384_fp32.onnx --kitti-root D:\datasets\KITTI --quantize-head
 ```
 
 먼저 `--limit 64`로 빠르게 돌려 파이프라인을 확인한 뒤 전체로 돌리면 시간을 아낄 수 있습니다.
-비교 실험 축: `--method minmax|entropy|percentile`, `--per-tensor`, `--keep-head-fp32`.
+첫 줄이 **본 INT8 모델**(`best_1248x384_int8_minmax.onnx`)입니다. 합성곱은 전부 INT8이고, Detect head의 디코딩 부분(DFL, Sigmoid, 좌표 계산, 마지막 Concat)만 float로 남깁니다.
+둘째 줄의 `--quantize-head`는 **대조 실험용**입니다. 마지막 Concat이 픽셀 좌표(0~약 1300)와 0~1 점수를 한 텐서로 묶기 때문에, 이를 INT8 하나의 scale로 바꾸면 한 칸이 약 5픽셀이 되어 점수가 전부 0으로 반올림되고 검출이 하나도 나오지 않습니다. 보고서에서 "디코딩을 float로 둔 근거"로 쓰면 됩니다. Hailo도 같은 구조(합성곱은 NPU, 디코딩·NMS는 호스트 CPU)입니다.
+
+비교 실험 축: `--method minmax|entropy|percentile`, `--per-tensor`, `--quantize-head`(대조군).
 
 ## 4. INT8의 AP40과 Drop Rate
 
@@ -42,13 +45,16 @@ Drop Rate는 절대값(baseline − INT8)과 상대값(÷ baseline)을 둘 다 �
 ## 5. 같은 조건에서 크기·파라미터·FLOPs·메모리·Latency 측정
 
 ```powershell
-python scripts\benchmark_onnx.py --models $W\best_1248x384_fp32.onnx $W\best_1248x384_int8_minmax.onnx $W\best_1248x384_int8_minmax_headfp32.onnx --threads 4 --output runs\benchmark_onnx.json
+python scripts\benchmark_onnx.py --models $W\best_1248x384_fp32.onnx $W\best_1248x384_int8_minmax.onnx --threads 4 --output runs\benchmark_onnx.json
 ```
 
 첫 번째 모델이 기준입니다. 측정 중에는 다른 프로그램을 끄고, `--threads` 값을 보고서에 적으세요.
 CPU provider로 재는 이유: ONNX Runtime은 QDQ INT8을 CPU에서 실제 INT8 커널로 실행하지만, CUDA provider에서는 대부분 float로 되돌려 실행합니다.
 
 ## 주의
+
+- GPU가 없는 PC에서도 2·4단계 평가가 됩니다. `predict_kitti.py`는 `--device cpu`일 때 CUDA를 요구하지 않습니다.
+- 파라미터 수는 Conv·Gemm·MatMul의 가중치와 bias만 셉니다(anchor·stride 상수 제외). export 과정에서 BatchNorm이 합성곱에 합쳐지므로, Ultralytics의 **fused** 요약과 비교하세요.
 
 - 모든 단계가 `eval_val.txt`를 읽지 않습니다. 최종 1회 측정은 모든 선택이 끝난 뒤에만 `--split eval_val.txt`로 합니다.
 - FLOPs와 파라미터 수는 INT8에서 그대로입니다(정상). 이 둘을 줄이려면 640×192 학습 같은 별도 축이 필요합니다.

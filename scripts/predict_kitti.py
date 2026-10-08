@@ -58,6 +58,10 @@ def read_ids(path: Path) -> list[str]:
 
 def main() -> None:
     args = parse_args()
+    # Only a GPU request needs CUDA; ONNX models (and .pt on CPU) are scored with
+    # --device cpu on machines without a GPU, such as a reviewer's laptop.
+    if str(args.device).lower() != "cpu" and not torch.cuda.is_available():
+        raise SystemExit(f"--device {args.device} requested but CUDA is unavailable; use --device cpu")
     if not args.weights.is_file():
         raise SystemExit(f"Weights not found: {args.weights}")
     image_dir = args.kitti_root / "training" / "image_2"
@@ -127,6 +131,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    if not torch.cuda.is_available():
-        raise SystemExit("CUDA is unavailable")
     main()

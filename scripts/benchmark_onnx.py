@@ -10,9 +10,12 @@ The first model is the baseline; every other row is also reported relative to it
 Per model it records the five quantities the benchmark notice scores
 (accuracy comes from predict_kitti.py + evaluate_kitti.py, not from here):
 
-  parameters  element count of weight/bias initializers, read from the graph.
-              Quantization scales and zero points are not counted, so FP32 and
-              INT8 report the same number, as they should.
+  parameters  elements of the weight and bias tensors feeding Conv /
+              ConvTranspose / Gemm / MatMul (through DequantizeLinear in INT8
+              graphs). Head constants (anchors, strides), scales and zero
+              points are not counted, so FP32 and INT8 report the same number.
+              The export folds BatchNorm into the convolutions, so compare with
+              Ultralytics' fused model summary, not the unfused training one.
   FLOPs       2 x MACs of Conv / QLinearConv / ConvTranspose / MatMul / Gemm,
               from ONNX shape inference. Elementwise ops are not counted.
               Quantization does not change it; resolution and pruning do.
@@ -45,8 +48,7 @@ from pathlib import Path
 
 from onnx_common import ROOT, file_sha256, preprocess, static_input
 
-WEIGHT_TYPES = {1, 2, 3, 6, 10, 16}  # float, uint8, int8, int32, float16, bfloat16
-SKIP_SUFFIXES = ("_scale", "_zero_point")
+WEIGHTED_OPS = {"Conv", "ConvTranspose", "Gemm", "MatMul", "QLinearConv", "QLinearMatMul"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -65,14 +67,40 @@ def parse_args() -> argparse.Namespace:
 
 # ----------------------------------------------------------------- static analysis
 def count_parameters(model) -> int:
-    total = 0
-    for init in model.graph.initializer:
-        if init.data_type not in WEIGHT_TYPES or init.name.endswith(SKIP_SUFFIXES):
+    """Count weights/biases of weighted layers only.
+
+    Counting every initializer would also count the Detect head's anchor and
+    stride tables (~30k values at 1248x384), which are constants, not learned
+    parameters. In a QDQ graph a weight reaches its Conv through
+    DequantizeLinear, so each input is traced back to the initializer.
+    """
+    initializers = {init.name: init for init in model.graph.initializer}
+    producer = {output: node for node in model.graph.node for output in node.output}
+
+    def source_initializer(name: str):
+        seen = 0
+        while name not in initializers and seen < 4:
+            node = producer.get(name)
+            if node is None or node.op_type not in ("DequantizeLinear", "Identity", "Cast"):
+                return None
+            name, seen = node.input[0], seen + 1
+        return initializers.get(name)
+
+    counted: set[str] = set()
+    for node in model.graph.node:
+        if node.op_type not in WEIGHTED_OPS:
             continue
-        if len(init.dims) == 0:
-            continue  # scalars are constants, not learned weights
-        total += math.prod(init.dims)
-    return int(total)
+        if node.op_type == "QLinearConv":
+            candidates = [node.input[3]] + ([node.input[8]] if len(node.input) > 8 else [])
+        elif node.op_type == "QLinearMatMul":
+            candidates = [node.input[0], node.input[3]]
+        else:
+            candidates = list(node.input[:3])
+        for name in candidates:
+            init = source_initializer(name) if name else None
+            if init is not None and len(init.dims) > 0:
+                counted.add(init.name)
+    return int(sum(math.prod(initializers[name].dims) for name in counted))
 
 
 def count_flops(model) -> dict[str, object]:
@@ -221,10 +249,11 @@ def worker(config: dict) -> dict:
 
 
 def run_worker(path: Path, args: argparse.Namespace) -> dict:
-    config = {"model": str(path), "provider": args.provider, "threads": args.threads,
+    # The worker runs with cwd=scripts/, so every path it receives must be absolute.
+    config = {"model": str(path.resolve()), "provider": args.provider, "threads": args.threads,
               "warmup": args.warmup, "repeats": args.repeats,
-              "image": str(args.image) if args.image else None}
-    command = [sys.executable, str(Path(__file__).resolve()), "--models", str(path),
+              "image": str(args.image.resolve()) if args.image else None}
+    command = [sys.executable, str(Path(__file__).resolve()), "--models", str(path.resolve()),
                "--_worker", json.dumps(config)]
     result = subprocess.run(command, capture_output=True, text=True, cwd=str(Path(__file__).parent))
     if result.returncode != 0:
@@ -252,9 +281,12 @@ def main() -> None:
         return
     if args.warmup < 0 or args.repeats < 2 or args.threads <= 0:
         raise SystemExit("--warmup >= 0, --repeats >= 2 and --threads > 0 are required")
+    args.models = [path.resolve() for path in args.models]
     for path in args.models:
         if not path.is_file():
             raise SystemExit(f"Model not found: {path}")
+    if args.image is not None and not args.image.is_file():
+        raise SystemExit(f"Image not found: {args.image}")
     shapes = {tuple(static_input(path)[1]) for path in args.models}
     if len(shapes) > 1:
         print(f"NOTE: models have different input shapes {sorted(shapes)}; "
