@@ -1,0 +1,6 @@
+# Extra packages for scripts/export_onnx.py, quantize_ort.py, benchmark_onnx.py.
+# Install after requirements-tested.txt. Versions are the ones these scripts were tested with.
+onnx==1.23.2
+onnxruntime==1.24.4
+onnxslim==0.1.97
+# psutil and opencv-python already come with ultralytics.
