@@ -51,6 +51,15 @@ python scripts\benchmark_onnx.py --models $W\best_1248x384_fp32.onnx $W\best_124
 첫 번째 모델이 기준입니다. 측정 중에는 다른 프로그램을 끄고, `--threads` 값을 보고서에 적으세요.
 CPU provider로 재는 이유: ONNX Runtime은 QDQ INT8을 CPU에서 실제 INT8 커널로 실행하지만, CUDA provider에서는 대부분 float로 되돌려 실행합니다.
 
+**P코어·E코어가 섞인 CPU(인텔 12세대 이상)는 P코어에 고정해서 재세요.** 고정하지 않으면 Windows가 측정 스레드를 E코어로 보내
+같은 모델이 2배 이상 느려지고, 실행마다 P/E가 섞여 평균과 속도 향상 배수가 틀어집니다 (PC00 i9-12900 실측: `실험결과1013.md` 6절).
+`start /affinity`로 띄우면 측정 하위 프로세스도 같은 코어 설정을 물려받습니다. 마스크는 P코어 논리 CPU 번호로 정합니다
+(i9-12900은 0~15 → `FFFF`; 보통 P코어가 앞 번호이고 마스크는 2^(P코어 수×2)−1).
+
+```powershell
+cmd /c 'start "" /affinity FFFF /b /wait .venv\Scripts\python.exe scripts\benchmark_onnx.py --models runs\baseline\yolo11n_exact3_1248\weights\best_1248x384_fp32.onnx runs\baseline\yolo11n_exact3_1248\weights\best_1248x384_int8_percentile.onnx --threads 4 --output runs\benchmark_onnx_pcores.json'
+```
+
 ## 주의
 
 - GPU가 없는 PC에서도 2·4단계 평가가 됩니다. `predict_kitti.py`는 `--device cpu`일 때 CUDA를 요구하지 않습니다.
