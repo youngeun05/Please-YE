@@ -1,85 +1,161 @@
-# Please-YE
+# Please-YE — KITTI 2D 객체 검출 INT8 최적화 (트랙 2 지정주제)
 
-KITTI 2D 객체 검출을 Hailo-10H에 배포하기 위한 재현 가능한 실험 레포입니다. 현재 1단계는 **데이터 무결성, 누수 방지 분할, KITTI→YOLO 변환, AP40 평가기, CUDA 학습 경로**까지 검증되었습니다.
+YOLO11n을 KITTI로 학습하고, ONNX Runtime 정적 INT8 양자화(PTQ)로 최적화한 결과를 재현하는 레포입니다.
+**GPU 없이 CPU만으로** 아래 명령을 따라 하면 보고서의 정확도와 속도 숫자가 다시 나옵니다.
 
-## 절대 지켜야 할 기준
+| | Baseline | 최적화 모델 |
+|---|---|---|
+| 모델 | YOLO11n FP32 (ONNX) | YOLO11n INT8 (ONNX QDQ, percentile 보정) |
+| 파일 | `models/yolo11n_kitti_1248x384_fp32.onnx` | `models/yolo11n_kitti_1248x384_int8.onnx` |
+| 입력 | 1×3×384×1248 (고정) | 1×3×384×1248 (고정) |
 
-- `eval_val.txt`의 1,000장은 학습·하이퍼파라미터 선택·증강 탐색에 사용하지 않습니다.
-- 최종 정확도는 Car/Pedestrian/Cyclist의 **KITTI 2D Moderate AP40 평균**으로 비교합니다.
-- KITTI 이미지, 생성 라벨, 체크포인트와 변환 산출물은 `.gitignore` 대상입니다.
-- `해체분석.md`는 공지 전 초안이므로 실험 기준으로 사용하지 않습니다.
+보고서 수치는 `eval_val.txt` 1,000장에서 KITTI 2D **Moderate AP40**(Car·Pedestrian·Cyclist 평균)으로 측정했습니다.
+개발 중 수치(internal_val 기준)는 [`실험결과1013.md`](실험결과1013.md)에 있습니다.
 
-## 이 PC에서 확인한 경로
+---
 
-```text
-repository  C:\Users\pro\Documents\ChatGPT\YE-please
-KITTI       C:\Users\pro\Documents\Codex\datasets\KITTI
-images      C:\Users\pro\Documents\Codex\datasets\KITTI\training\image_2
-labels      C:\Users\pro\Documents\Codex\datasets\KITTI\training\label_2
-source ZIP  C:\Users\pro\Downloads\data_object_image_2.zip
-source ZIP  C:\Users\pro\Downloads\data_object_label_2.zip
+## 재현 절차
+
+필요한 것: Python 3.10~3.13, 인터넷, 디스크 약 **30 GB** (KITTI ZIP 12 GB + 압축 해제 12 GB + 패키지). GPU는 필요 없습니다.
+명령은 레포 루트에서 실행합니다. Windows는 PowerShell, Linux·macOS는 bash 기준입니다.
+
+### 1. 환경 구성
+
+```powershell
+# Windows (PowerShell)
+git clone https://github.com/youngeun05/Please-YE.git
+cd Please-YE
+py -3.12 -m venv .venv            # 3.10~3.13 중 설치된 버전
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -r requirements-tested.txt -r requirements-onnx.txt
 ```
 
-레포의 `data/*/images/all`은 원본 이미지 폴더를 가리키는 Windows directory junction입니다. 이미지를 복사하지 않습니다.
+```bash
+# Linux / macOS (bash)
+git clone https://github.com/youngeun05/Please-YE.git
+cd Please-YE
+python3 -m venv .venv && source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -r requirements-tested.txt -r requirements-onnx.txt
+```
 
-## 고정 분할
+PowerShell에서 스크립트 실행이 막히면 먼저 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`를 실행합니다.
+
+### 2. KITTI 데이터 (공식 벤치마크 지정 파일 2개)
+
+`data_object_image_2.zip`(약 12 GB)과 `data_object_label_2.zip`(약 5 MB)을 받습니다.
+[KITTI 공식 페이지](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=2d)에서 받거나, 아래 미러를 씁니다.
+
+```powershell
+# Windows: 끊기면 같은 명령을 다시 실행하면 이어받습니다
+.\scripts\download_kitti.ps1 -ZipDir D:\downloads
+python scripts\prepare_kitti.py --image-zip D:\downloads\data_object_image_2.zip --label-zip D:\downloads\data_object_label_2.zip --eval-split eval_val.txt --output-root D:\datasets\KITTI
+```
+
+```bash
+# Linux / macOS
+mkdir -p ~/downloads && cd ~/downloads
+curl -L -C - -O https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_label_2.zip
+curl -L -C - -O https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_image_2.zip
+cd -
+python scripts/prepare_kitti.py --image-zip ~/downloads/data_object_image_2.zip --label-zip ~/downloads/data_object_label_2.zip --eval-split eval_val.txt --output-root ~/datasets/KITTI
+```
+
+`prepare_kitti.py`는 ZIP 전체의 CRC를 검사한 뒤 `training/image_2`와 `training/label_2`(각 7,481개)만 추출합니다. 수 분이 걸립니다.
+
+### 3. 평가기 (MMDetection3D 커밋 `fe25f7a`에 고정)
+
+```powershell
+.\scripts\setup_evaluator.ps1          # Windows
+```
+
+```bash
+bash scripts/setup_evaluator.sh        # Linux / macOS
+```
+
+### 4. 모델 파일
+
+GitHub Release에서 `please-ye-models.zip`을 받아 **레포 루트에서** 압축을 풉니다. `models/` 폴더가 생깁니다.
+
+- 다운로드: <https://github.com/youngeun05/Please-YE/releases/download/prelim-v1/please-ye-models.zip>
+
+```powershell
+Invoke-WebRequest https://github.com/youngeun05/Please-YE/releases/download/prelim-v1/please-ye-models.zip -OutFile please-ye-models.zip
+Expand-Archive please-ye-models.zip -DestinationPath . -Force
+```
+
+```bash
+curl -L -O https://github.com/youngeun05/Please-YE/releases/download/prelim-v1/please-ye-models.zip
+unzip -o please-ye-models.zip
+```
+
+파일 목록·SHA-256·포맷·버전은 압축 안의 `models/MODELS.md`에 있습니다.
+원본 PyTorch 체크포인트(`yolo11n_kitti_fp32.pt`)도 함께 들어 있습니다.
+
+### 5. 벤치마크 실행 (명령 하나)
+
+```powershell
+# Windows
+python scripts\run_benchmark.py --kitti-root D:\datasets\KITTI --split eval_val --confirm-final
+```
+
+```bash
+# Linux / macOS
+python scripts/run_benchmark.py --kitti-root ~/datasets/KITTI --split eval_val --confirm-final
+```
+
+이 명령이 하는 일:
+
+1. Baseline과 최적화 모델로 eval_val 1,000장을 예측합니다 (CPU, 배치 1, 입력 1248×384). 이미지마다 KITTI 형식 파일을 하나씩 씁니다.
+2. 고정 평가기로 Car·Pedestrian·Cyclist Moderate AP40과 평균을 계산합니다.
+3. `benchmark_onnx.py`로 모델 크기, 파라미터 수, FLOPs, Latency(p50·p95), Throughput, 피크 메모리를 잽니다 (4스레드, warmup 30회, 반복 200회).
+4. 결과를 보고서 표 형식으로 `runs/benchmark/eval_val/summary.md`에 씁니다 (2장 요약, 6.3 정확도, 6.4 속도).
+
+`--split eval_val`에는 `--confirm-final`이 필요합니다. eval_val로 모델을 고르는 일을 막기 위한 장치로,
+첫 실행 때 모델 해시를 `runs/benchmark/eval_val/FINAL_LOCK.json`에 기록하고 다른 모델로는 다시 채점하지 않습니다.
+같은 모델로 다시 실행하는 것은 허용됩니다.
+
+### 6. 기대 출력
+
+`summary.md`의 6.3 정확도 표가 보고서 6.3과 같아야 합니다 (CPU 부동소수점 차이로 ±0.01 이내).
+6.4의 속도와 메모리는 **측정하는 PC에 따라 달라집니다.** 보고서 수치는 아래 환경에서 측정했습니다.
+
+- Intel i9-12900 (P코어 8 + E코어 8), Windows 11, ONNX Runtime 1.24.4 CPU provider, 4스레드, **P코어 고정**, 2회 측정 평균
+- P코어와 E코어가 섞인 인텔 12세대 이상 CPU에서는 P코어에 고정해야 측정이 흔들리지 않습니다.
+  Windows 예: `cmd /c 'start "" /affinity FFFF /b /wait .venv\Scripts\python.exe scripts\run_benchmark.py ...'`
+  (`FFFF` = 논리 CPU 0~15, CPU에 맞게 조정. 자세한 내용은 [`ONNX_INT8.md`](ONNX_INT8.md))
+
+### 재현 시 유의사항
+
+- 처음 실행할 때 걸리는 시간: KITTI 다운로드(회선에 따라 수십 분), 압축 해제와 CRC 검사(수 분), 예측(모델당 수 분), 평가(모델당 수 분).
+- `numba`는 설치하지 않아도 됩니다. 평가기가 결과가 같은 순수 Python 경로로 대신 실행합니다 (속도만 느려짐).
+- ONNX Runtime의 INT8 이득은 CPU provider에서 나타납니다. CUDA provider는 INT8 연산 대부분을 float로 되돌려 실행합니다.
+- 내부 검증셋으로만 확인하려면 `--split internal_val`을 씁니다 (`--confirm-final` 불필요).
+- 측정 없이 정확도만 보려면 `--no-speed`를 붙입니다.
+
+---
+
+## 처음부터 다시 만들기 (학습 → ONNX → INT8)
+
+| 단계 | 문서 / 스크립트 |
+|---|---|
+| 데이터 준비, 분할, YOLO 변환, 학습 (Windows·CUDA) | [`SETUP_LOCAL.md`](SETUP_LOCAL.md), `scripts/train_baseline.py` |
+| ONNX export → INT8 PTQ → 측정 | [`ONNX_INT8.md`](ONNX_INT8.md), `scripts/export_onnx.py`, `scripts/quantize_ort.py`, `scripts/benchmark_onnx.py` |
+| 제출 모델 패키징 | `scripts/package_models.py` |
+| 실험 기록과 해석 | [`실험결과1013.md`](실험결과1013.md), [`계획점검0922.md`](계획점검0922.md), [`작업정리0922.md`](작업정리0922.md) |
+
+## 데이터 분할 규칙
 
 | 용도 | 수량 | 파일 |
 |---|---:|---|
 | 학습 | 5,481 | `splits/train.txt` |
-| 내부 검증 | 1,000 | `splits/internal_val.txt` |
-| INT8 calibration | 1,024 | `splits/calibration.txt` (학습 집합의 부분집합) |
-| 공식 평가 | 1,000 | `eval_val.txt` |
+| 내부 검증 (모델·설정 선택) | 1,000 | `splits/internal_val.txt` |
+| INT8 보정 (calibration, 학습 집합의 부분집합) | 1,024 | `splits/calibration.txt` |
+| **공식 평가 (학습·선택에 사용 금지)** | 1,000 | `eval_val.txt` |
 
-세 독립 집합의 교집합은 모두 0입니다. 분할 생성 알고리즘과 클래스/난이도 분포는 `splits/split_report.json`에 기록했습니다.
-
-## 재현 순서
-
-PowerShell에서 레포 루트를 기준으로 실행합니다.
-
-```powershell
-python scripts\prepare_kitti.py --image-zip C:\Users\pro\Downloads\data_object_image_2.zip --label-zip C:\Users\pro\Downloads\data_object_label_2.zip --output-root C:\Users\pro\Documents\Codex\datasets\KITTI --eval-split .\eval_val.txt
-
-python scripts\audit_kitti.py --kitti-root C:\Users\pro\Documents\Codex\datasets\KITTI --eval-split .\eval_val.txt --report .\runs\audit_report.local.json
-
-python scripts\make_splits.py --kitti-root C:\Users\pro\Documents\Codex\datasets\KITTI --eval-split .\eval_val.txt --output-dir .\splits
-```
-
-그다음 각 출력 루트에 `images\all` junction을 한 번 만든 뒤 변환합니다.
-
-```powershell
-New-Item -ItemType Junction -Path .\data\kitti_yolo_exact3\images\all -Target C:\Users\pro\Documents\Codex\datasets\KITTI\training\image_2
-New-Item -ItemType Junction -Path .\data\kitti_yolo_neighbors3\images\all -Target C:\Users\pro\Documents\Codex\datasets\KITTI\training\image_2
-
-python scripts\convert_kitti_to_yolo.py --kitti-root C:\Users\pro\Documents\Codex\datasets\KITTI --splits-dir .\splits --official-eval .\eval_val.txt --output-root .\data\kitti_yolo_exact3 --neighbor-policy ignore
-python scripts\convert_kitti_to_yolo.py --kitti-root C:\Users\pro\Documents\Codex\datasets\KITTI --splits-dir .\splits --official-eval .\eval_val.txt --output-root .\data\kitti_yolo_neighbors3 --neighbor-policy map
-```
-
-`exact3`는 세 평가 클래스만 학습합니다. `neighbors3`는 KITTI 평가에서 ignore 이웃 클래스로 취급되는 Van→Car, Person_sitting→Pedestrian 매핑을 비교하기 위한 실험군입니다. 어느 쪽이 우수한지는 내부 AP40 결과로 결정하며 아직 가정하지 않습니다.
-
-## 평가기 검증
-
-평가 코드는 OpenMMLab MMDetection3D의 커밋 `fe25f7a51d36e3702f961e198894580d83c4387b`에 고정했습니다.
-
-```powershell
-.\scripts\setup_evaluator.ps1
-python scripts\verify_evaluator.py --kitti-root C:\Users\pro\Documents\Codex\datasets\KITTI --work-dir .\runs\evaluator_sanity
-```
-
-정답 박스를 그대로 예측하면 세 클래스 모두 100.0, 빈 예측은 모두 0.0이어야 합니다. 실제 예측 폴더 평가는 다음과 같습니다.
-
-```powershell
-python scripts\evaluate_kitti.py --kitti-root C:\Users\pro\Documents\Codex\datasets\KITTI --split .\splits\internal_val.txt --predictions .\runs\predictions --output .\runs\metrics.json
-```
-
-예측 파일은 이미지마다 하나씩 존재해야 하며 KITTI 16열 형식이어야 합니다. 검출이 없으면 빈 파일을 둡니다. 현재 기준 구현은 널리 쓰이는 R40 참조이며, 주최 측이 별도 평가 코드를 배포하면 동일 예측으로 수치 일치를 다시 확인해야 합니다.
-
-## CUDA 스모크 테스트
-
-현재 확인 환경은 RTX A6000 48GB ×2, PyTorch 2.6.0+cu124, Ultralytics 8.4.108입니다.
-
-```powershell
-python scripts\smoke_train.py --device 0 --fraction 0.01
-```
-
-이 테스트는 55장으로 1 epoch를 돌려 이미지·라벨·손실·역전파·CUDA 경로만 확인합니다. 성능 수치로 사용하지 않습니다. 본 학습 전에 입력 크기, 사전학습 가중치, Hailo 변환 가능 모델을 별도 확정합니다.
+세 독립 집합(train, internal_val, eval_val)의 교집합은 0이며, 학습·export·양자화 스크립트가 실행할 때마다 이를 검사합니다.
+분할 알고리즘과 클래스·난이도 분포는 `splits/split_report.json`에 있습니다.
+KITTI 이미지, 생성 라벨, 체크포인트, ONNX 파일은 git에 올리지 않습니다 (`.gitignore`).
