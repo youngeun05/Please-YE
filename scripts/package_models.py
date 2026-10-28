@@ -149,14 +149,17 @@ def main() -> None:
     write_manifest(entries, args.output)
 
     if not args.no_zip:
-        archive = args.output / "please-ye-models.zip"
+        # Paths inside the zip use the output folder's own name, so a bundle made for
+        # another experiment (e.g. models_640/) can never overwrite models/ when unzipped.
+        folder = args.output.resolve().name
+        archive = args.output / ("please-ye-models.zip" if folder == "models" else f"please-ye-{folder}.zip")
         with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
             for e in entries:
-                bundle.write(args.output / e["file"], f"models/{e['file']}")
+                bundle.write(args.output / e["file"], f"{folder}/{e['file']}")
             for extra in ("manifest.json", "MODELS.md"):
-                bundle.write(args.output / extra, f"models/{extra}")
+                bundle.write(args.output / extra, f"{folder}/{extra}")
             for record in sorted((args.output / "records").glob("*.json")):
-                bundle.write(record, f"models/records/{record.name}")
+                bundle.write(record, f"{folder}/records/{record.name}")
         print(f"zip     : {archive} ({archive.stat().st_size / 1024 ** 2:.1f} MiB)")
     print(f"manifest: {args.output / 'MODELS.md'}")
     for e in entries:

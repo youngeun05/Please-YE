@@ -36,3 +36,4 @@ Thumbs.db
 # Submission bundle (upload to GitHub Release, do not commit)
 models/*.zip
 please-ye-models.zip
+models_640/
