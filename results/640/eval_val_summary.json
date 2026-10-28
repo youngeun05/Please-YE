@@ -1,0 +1,165 @@
+{
+  "split": "eval_val",
+  "split_file": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\eval_val.txt",
+  "models": [
+    {
+      "label": "baseline",
+      "role": "baseline",
+      "path": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\models\\yolo11n_kitti_1248x384_fp32.onnx",
+      "sha256": "f7c13c8484c69965c2698ccacaabe7160b27d1cc68df78b5aa17a6a0184f47b6",
+      "format": "onnx"
+    },
+    {
+      "label": "optimized",
+      "role": "optimized",
+      "path": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\runs\\baseline\\yolo11n_exact3_640\\weights\\best_640x192_int8_percentile.onnx",
+      "sha256": "28a72863c82a2a6eb6543877f1544e3a8023c7bddc94bddbb92ef315a6a83c51",
+      "format": "onnx"
+    },
+    {
+      "label": "y640_fp32",
+      "role": "extra",
+      "path": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\runs\\baseline\\yolo11n_exact3_640\\weights\\best_640x192_fp32.onnx",
+      "sha256": "c449b45ffe9a8ec767cf3f339413b45970f2c4718f15852c89ee2c5af25bfae0",
+      "format": "onnx"
+    },
+    {
+      "label": "y1248_int8",
+      "role": "extra",
+      "path": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\models\\yolo11n_kitti_1248x384_int8.onnx",
+      "sha256": "2d5477348402719ca713860b9d3bf317d8dbe9f88c2d38fb816286c571565d27",
+      "format": "onnx"
+    }
+  ],
+  "accuracy": {
+    "baseline": {
+      "class_ap40_moderate": {
+        "Car": 98.0752935090747,
+        "Pedestrian": 91.43650814091488,
+        "Cyclist": 92.72014225426946
+      },
+      "mean_ap40_moderate": 94.07731463475301
+    },
+    "optimized": {
+      "class_ap40_moderate": {
+        "Car": 97.43431436169419,
+        "Pedestrian": 80.99228433102982,
+        "Cyclist": 87.73678498935959
+      },
+      "mean_ap40_moderate": 88.72112789402786
+    },
+    "y640_fp32": {
+      "class_ap40_moderate": {
+        "Car": 98.00458582273801,
+        "Pedestrian": 82.07015000556754,
+        "Cyclist": 87.96127986394804
+      },
+      "mean_ap40_moderate": 89.34533856408454
+    },
+    "y1248_int8": {
+      "class_ap40_moderate": {
+        "Car": 97.95451004107356,
+        "Pedestrian": 90.86285115583642,
+        "Cyclist": 92.31412267663069
+      },
+      "mean_ap40_moderate": 93.71049462451356
+    }
+  },
+  "speed": {
+    "models": {
+      "baseline": {
+        "bytes": 10634414,
+        "mib": 10.141767501831055,
+        "mb": 10.634414,
+        "parameters": 2582737,
+        "gflops": 7.469968896,
+        "latency_median_ms": 26.699225010816008,
+        "latency_mean_ms": 27.260501249402296,
+        "latency_p95_ms": 32.09719998994842,
+        "peak_memory_mib": 172.533203125,
+        "runs_averaged": 2,
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "fps": 37.4542706612231
+      },
+      "optimized": {
+        "bytes": 3119326,
+        "mib": 2.974821090698242,
+        "mb": 3.119326,
+        "parameters": 2582737,
+        "gflops": 1.8993408,
+        "latency_median_ms": 5.093424959341064,
+        "latency_mean_ms": 5.1759187507559545,
+        "latency_p95_ms": 5.8532500406727195,
+        "peak_memory_mib": 90.048828125,
+        "runs_averaged": 2,
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "fps": 196.33154664741932
+      },
+      "y640_fp32": {
+        "bytes": 10488101,
+        "mib": 10.002232551574707,
+        "mb": 10.488101,
+        "parameters": 2582737,
+        "gflops": 1.8993408,
+        "latency_median_ms": 6.896324950503185,
+        "latency_mean_ms": 7.107333500753157,
+        "latency_p95_ms": 8.258799964096397,
+        "peak_memory_mib": 107.095703125,
+        "runs_averaged": 2,
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "fps": 145.00476807245514
+      },
+      "y1248_int8": {
+        "bytes": 3265560,
+        "mib": 3.1142807006835938,
+        "mb": 3.26556,
+        "parameters": 2582737,
+        "gflops": 7.469968896,
+        "latency_median_ms": 16.412599972682074,
+        "latency_mean_ms": 16.84770699881483,
+        "latency_p95_ms": 19.17135005351156,
+        "peak_memory_mib": 110.796875,
+        "runs_averaged": 2,
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "fps": 60.92879870736193
+      }
+    },
+    "environments": [
+      {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "logical_cpus": 24,
+        "platform": "Windows-11-10.0.26200-SP0",
+        "python": "3.13.2",
+        "onnxruntime": "1.24.4",
+        "provider": "cpu",
+        "threads": 4
+      },
+      {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "logical_cpus": 24,
+        "platform": "Windows-11-10.0.26200-SP0",
+        "python": "3.13.2",
+        "onnxruntime": "1.24.4",
+        "provider": "cpu",
+        "threads": 4
+      }
+    ],
+    "files": [
+      "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\runs\\benchmark_640_pcores_run1.json",
+      "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\runs\\benchmark_640_pcores_run2.json"
+    ]
+  },
+  "versions": {
+    "python": "3.13.2",
+    "onnxruntime": "1.24.4"
+  },
+  "platform": "Windows-11-10.0.26200-SP0"
+}

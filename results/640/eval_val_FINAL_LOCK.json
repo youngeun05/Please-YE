@@ -1,0 +1,31 @@
+{
+  "created": "2026-10-28T09:53:22+00:00",
+  "models": [
+    {
+      "label": "baseline",
+      "file": "yolo11n_kitti_1248x384_fp32.onnx",
+      "sha256": "f7c13c8484c69965c2698ccacaabe7160b27d1cc68df78b5aa17a6a0184f47b6"
+    },
+    {
+      "label": "optimized",
+      "file": "best_640x192_int8_percentile.onnx",
+      "sha256": "28a72863c82a2a6eb6543877f1544e3a8023c7bddc94bddbb92ef315a6a83c51"
+    },
+    {
+      "label": "y640_fp32",
+      "file": "best_640x192_fp32.onnx",
+      "sha256": "c449b45ffe9a8ec767cf3f339413b45970f2c4718f15852c89ee2c5af25bfae0"
+    },
+    {
+      "label": "y1248_int8",
+      "file": "yolo11n_kitti_1248x384_int8.onnx",
+      "sha256": "2d5477348402719ca713860b9d3bf317d8dbe9f88c2d38fb816286c571565d27"
+    }
+  ],
+  "mean_ap40_moderate": {
+    "baseline": 94.07731463475301,
+    "optimized": 88.72112789402786,
+    "y640_fp32": 89.34533856408454,
+    "y1248_int8": 93.71049462451356
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "created": "2026-10-28T09:53:23+00:00",
+  "packaged_on": "Windows-11-10.0.26200-SP0",
+  "models": [
+    {
+      "file": "yolo11n_kitti_fp32.pt",
+      "role": "baseline (original)",
+      "model": "yolo11n",
+      "format": "PyTorch checkpoint, Ultralytics",
+      "sha256": "6b0ec8ca2fe38bb7b8101976eff2c8df0ba6fce323424fe1f6c5d88a47d39819",
+      "bytes": 5469572,
+      "input_shape": [
+        1,
+        3,
+        192,
+        640
+      ],
+      "source": "runs\\baseline\\yolo11n_exact3_640\\weights\\best.pt"
+    },
+    {
+      "file": "yolo11n_kitti_640x192_fp32.onnx",
+      "role": "baseline (measured)",
+      "model": "yolo11n",
+      "format": "ONNX FP32, opset 17",
+      "sha256": "c449b45ffe9a8ec767cf3f339413b45970f2c4718f15852c89ee2c5af25bfae0",
+      "bytes": 10488101,
+      "input_shape": [
+        1,
+        3,
+        192,
+        640
+      ],
+      "source": "runs\\baseline\\yolo11n_exact3_640\\weights\\best_640x192_fp32.onnx",
+      "versions": {
+        "python": "3.13.2",
+        "torch": "2.6.0+cu124",
+        "ultralytics": "8.4.108",
+        "onnx": "1.23.2",
+        "onnxruntime": "1.24.4"
+      }
+    },
+    {
+      "file": "yolo11n_kitti_640x192_int8.onnx",
+      "role": "optimized",
+      "model": "yolo11n",
+      "format": "ONNX INT8 QDQ (ONNX Runtime static PTQ)",
+      "sha256": "28a72863c82a2a6eb6543877f1544e3a8023c7bddc94bddbb92ef315a6a83c51",
+      "bytes": 3119326,
+      "input_shape": [
+        1,
+        3,
+        192,
+        640
+      ],
+      "source": "runs\\baseline\\yolo11n_exact3_640\\weights\\best_640x192_int8_percentile.onnx",
+      "versions": {
+        "python": "3.13.2",
+        "onnx": "1.23.2",
+        "onnxruntime": "1.24.4"
+      },
+      "quantization": {
+        "method": "percentile",
+        "percentile": 99.999,
+        "weights": "int8 symmetric per-channel",
+        "activations": "uint8 asymmetric",
+        "format": "QDQ",
+        "head_decode": "float",
+        "excluded_nodes": 24,
+        "calibration_images": 1024,
+        "calibration_ids_sha256": "ad3c6cbf292709e2c8716085c1e10ebc92bcf7c70787473ff8b3913b14ad351c",
+        "calibration_chunk": 16,
+        "quant_pre_process": true
+      }
+    }
+  ]
+}

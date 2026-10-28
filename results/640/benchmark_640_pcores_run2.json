@@ -1,0 +1,274 @@
+{
+  "baseline": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\models\\yolo11n_kitti_1248x384_fp32.onnx",
+  "environment": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "logical_cpus": 24,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.2",
+    "onnxruntime": "1.24.4",
+    "provider": "cpu",
+    "threads": 4
+  },
+  "models": [
+    {
+      "model": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\models\\yolo11n_kitti_1248x384_fp32.onnx",
+      "sha256": "f7c13c8484c69965c2698ccacaabe7160b27d1cc68df78b5aa17a6a0184f47b6",
+      "bytes": 10634414,
+      "mib": 10.141767501831055,
+      "input_name": "images",
+      "input_shape": [
+        1,
+        3,
+        384,
+        1248
+      ],
+      "parameters": 2582737,
+      "flops": {
+        "flops": 7469968896,
+        "gflops": 7.469968896,
+        "by_op": {
+          "Conv": 7385863680,
+          "MatMul": 84105216
+        },
+        "unresolved_nodes": 0,
+        "onnx_version": "1.23.2",
+        "scope": "2 x MACs of Conv/QLinearConv/ConvTranspose/MatMul/Gemm; elementwise ops excluded"
+      },
+      "qdq_nodes": 0,
+      "node_count": 318,
+      "metadata": {},
+      "runtime": {
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "input": "seeded random tensor",
+        "session_load_seconds": 0.061952500022016466,
+        "memory": {
+          "rss_before_load_mib": 69.3359375,
+          "rss_after_load_mib": 89.27734375,
+          "session_load_delta_mib": 19.94140625,
+          "peak_rss_mib": 172.69140625,
+          "scope": "whole worker process (python + numpy + onnxruntime + session)"
+        },
+        "latency_ms": {
+          "mean": 26.820557002793066,
+          "median": 26.119249989278615,
+          "stdev": 2.4213047739276305,
+          "p95": 31.634500017389655,
+          "min": 23.887099931016564,
+          "max": 33.84980000555515
+        },
+        "images_per_second": 37.2848334169891,
+        "latency_scope": "session.run on a resident tensor; excludes decode, letterbox, NMS",
+        "onnxruntime": "1.24.4"
+      },
+      "relative_to_baseline": {
+        "size": 1.0,
+        "parameters": 1.0,
+        "flops": 1.0,
+        "latency_mean": 1.0,
+        "speedup": 1.0,
+        "peak_rss": 1.0
+      }
+    },
+    {
+      "model": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\models\\yolo11n_kitti_1248x384_int8.onnx",
+      "sha256": "2d5477348402719ca713860b9d3bf317d8dbe9f88c2d38fb816286c571565d27",
+      "bytes": 3265560,
+      "mib": 3.1142807006835938,
+      "input_name": "images",
+      "input_shape": [
+        1,
+        3,
+        384,
+        1248
+      ],
+      "parameters": 2582737,
+      "flops": {
+        "flops": 7469968896,
+        "gflops": 7.469968896,
+        "by_op": {
+          "Conv": 7385863680,
+          "MatMul": 84105216
+        },
+        "unresolved_nodes": 0,
+        "onnx_version": "1.23.2",
+        "scope": "2 x MACs of Conv/QLinearConv/ConvTranspose/MatMul/Gemm; elementwise ops excluded"
+      },
+      "qdq_nodes": 787,
+      "node_count": 1105,
+      "metadata": {
+        "please_ye_quantization": "{\"method\": \"percentile\", \"percentile\": 99.999, \"weights\": \"int8 symmetric per-channel\", \"activations\": \"uint8 asymmetric\", \"format\": \"QDQ\", \"head_decode\": \"float\", \"excluded_nodes\": 24, \"calibration_images\": 1024, \"calibration_ids_sha256\": \"ad3c6cbf292709e2c8716085c1e10ebc92bcf7c70787473ff8b3913b14ad351c\", \"calibration_chunk\": 16, \"quant_pre_process\": true}"
+      },
+      "runtime": {
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "input": "seeded random tensor",
+        "session_load_seconds": 0.12580020003952086,
+        "memory": {
+          "rss_before_load_mib": 69.0703125,
+          "rss_after_load_mib": 87.85546875,
+          "session_load_delta_mib": 18.78515625,
+          "peak_rss_mib": 110.85546875,
+          "scope": "whole worker process (python + numpy + onnxruntime + session)"
+        },
+        "latency_ms": {
+          "mean": 16.864329999079928,
+          "median": 16.47699996829033,
+          "stdev": 1.1986529011090408,
+          "p95": 19.11860005930066,
+          "min": 15.447299927473068,
+          "max": 21.78990002721548
+        },
+        "images_per_second": 59.29675237940418,
+        "latency_scope": "session.run on a resident tensor; excludes decode, letterbox, NMS",
+        "onnxruntime": "1.24.4"
+      },
+      "relative_to_baseline": {
+        "size": 0.30707474807732704,
+        "parameters": 1.0,
+        "flops": 1.0,
+        "latency_mean": 0.6287837347048271,
+        "speedup": 1.5903719272723151,
+        "peak_rss": 0.6419281141848945
+      }
+    },
+    {
+      "model": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\runs\\baseline\\yolo11n_exact3_640\\weights\\best_640x192_fp32.onnx",
+      "sha256": "c449b45ffe9a8ec767cf3f339413b45970f2c4718f15852c89ee2c5af25bfae0",
+      "bytes": 10488101,
+      "mib": 10.002232551574707,
+      "input_name": "images",
+      "input_shape": [
+        1,
+        3,
+        192,
+        640
+      ],
+      "parameters": 2582737,
+      "flops": {
+        "flops": 1899340800,
+        "gflops": 1.8993408,
+        "by_op": {
+          "Conv": 1893811200,
+          "MatMul": 5529600
+        },
+        "unresolved_nodes": 0,
+        "onnx_version": "1.23.2",
+        "scope": "2 x MACs of Conv/QLinearConv/ConvTranspose/MatMul/Gemm; elementwise ops excluded"
+      },
+      "qdq_nodes": 0,
+      "node_count": 318,
+      "metadata": {},
+      "runtime": {
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "input": "seeded random tensor",
+        "session_load_seconds": 0.07001589995343238,
+        "memory": {
+          "rss_before_load_mib": 65.44140625,
+          "rss_after_load_mib": 85.15234375,
+          "session_load_delta_mib": 19.7109375,
+          "peak_rss_mib": 106.98828125,
+          "scope": "whole worker process (python + numpy + onnxruntime + session)"
+        },
+        "latency_ms": {
+          "mean": 7.045765002258122,
+          "median": 6.769249972421676,
+          "stdev": 0.6671867895992217,
+          "p95": 8.297399966977537,
+          "min": 6.353899952955544,
+          "max": 8.532900013960898
+        },
+        "images_per_second": 141.9292297826434,
+        "latency_scope": "session.run on a resident tensor; excludes decode, letterbox, NMS",
+        "onnxruntime": "1.24.4"
+      },
+      "relative_to_baseline": {
+        "size": 0.9862415550118699,
+        "parameters": 1.0,
+        "flops": 0.25426354867649503,
+        "latency_mean": 0.26270017440444593,
+        "speedup": 3.8066209977479026,
+        "peak_rss": 0.6195344839286118
+      }
+    },
+    {
+      "model": "C:\\Users\\PC00\\Desktop\\이영은\\이영은 모커톤\\runs\\baseline\\yolo11n_exact3_640\\weights\\best_640x192_int8_percentile.onnx",
+      "sha256": "28a72863c82a2a6eb6543877f1544e3a8023c7bddc94bddbb92ef315a6a83c51",
+      "bytes": 3119326,
+      "mib": 2.974821090698242,
+      "input_name": "images",
+      "input_shape": [
+        1,
+        3,
+        192,
+        640
+      ],
+      "parameters": 2582737,
+      "flops": {
+        "flops": 1899340800,
+        "gflops": 1.8993408,
+        "by_op": {
+          "Conv": 1893811200,
+          "MatMul": 5529600
+        },
+        "unresolved_nodes": 0,
+        "onnx_version": "1.23.2",
+        "scope": "2 x MACs of Conv/QLinearConv/ConvTranspose/MatMul/Gemm; elementwise ops excluded"
+      },
+      "qdq_nodes": 787,
+      "node_count": 1105,
+      "metadata": {
+        "please_ye_quantization": "{\"method\": \"percentile\", \"percentile\": 99.999, \"weights\": \"int8 symmetric per-channel\", \"activations\": \"uint8 asymmetric\", \"format\": \"QDQ\", \"head_decode\": \"float\", \"excluded_nodes\": 24, \"calibration_images\": 1024, \"calibration_ids_sha256\": \"ad3c6cbf292709e2c8716085c1e10ebc92bcf7c70787473ff8b3913b14ad351c\", \"calibration_chunk\": 16, \"quant_pre_process\": true}"
+      },
+      "runtime": {
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "input": "seeded random tensor",
+        "session_load_seconds": 0.12291509995702654,
+        "memory": {
+          "rss_before_load_mib": 64.90234375,
+          "rss_after_load_mib": 83.43359375,
+          "session_load_delta_mib": 18.53125,
+          "peak_rss_mib": 90.04296875,
+          "scope": "whole worker process (python + numpy + onnxruntime + session)"
+        },
+        "latency_ms": {
+          "mean": 5.108598499791697,
+          "median": 4.983649996574968,
+          "stdev": 0.3389659838685394,
+          "p95": 5.877400049939752,
+          "min": 4.77649993263185,
+          "max": 6.580999935977161
+        },
+        "images_per_second": 195.74840341059786,
+        "latency_scope": "session.run on a resident tensor; excludes decode, letterbox, NMS",
+        "onnxruntime": "1.24.4"
+      },
+      "relative_to_baseline": {
+        "size": 0.29332373180130095,
+        "parameters": 1.0,
+        "flops": 0.25426354867649503,
+        "latency_mean": 0.19047324405901384,
+        "speedup": 5.250081211879672,
+        "peak_rss": 0.5214096677147187
+      }
+    }
+  ]
+}
