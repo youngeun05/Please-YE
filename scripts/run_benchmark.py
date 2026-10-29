@@ -55,6 +55,7 @@ SPLITS = {"internal_val": ROOT / "splits/internal_val.txt", "eval_val": ROOT / "
 DEFAULT_BASELINE = ROOT / "models/yolo11n_kitti_1248x384_fp32.onnx"
 DEFAULT_OPTIMIZED = ROOT / "models/yolo11n_kitti_1248x384_int8.onnx"
 CLASSES = ("Car", "Pedestrian", "Cyclist")
+EXPECTED = ROOT / "results/eval_val_expected_by_cpu.json"
 
 
 def parse_args() -> argparse.Namespace:
@@ -309,6 +310,55 @@ def build_summary(split: str, models: list[dict], metrics: dict[str, dict], spee
     return "\n".join(lines) + "\n"
 
 
+def int8_check(split: str, models: list[dict], metrics: dict[str, dict]) -> tuple[dict, dict | None, list[str]]:
+    """Probe this CPU's INT8 path and compare with the expected values for that path.
+
+    ONNX Runtime's INT8 result depends on the CPU: with VNNI the uint8 x int8 products
+    are exact, without VNNI they saturate (scripts/int8_probe.py). The same INT8 file
+    therefore has two correct reference results; FP32 has one.
+    """
+    try:
+        from int8_probe import probe
+
+        result = probe()
+    except Exception as error:  # the benchmark itself must not fail because of the probe
+        result = {"error": f"{type(error).__name__}: {error}"}
+    lines = ["", "## 재현 확인 — CPU의 INT8 계산 경로", ""]
+    if "error" in result:
+        lines.append(f"INT8 경로 검사 실패: {result['error']}")
+        return result, None, lines
+    path = "no_vnni" if result["saturates"] else "vnni"
+    lines.append(f"이 CPU의 INT8 경로: **{result['int8_path']}** (검사값 {result['got']:,} / 정확한 값 "
+                 f"{result['expected_exact']:,}, `scripts/int8_probe.py`).")
+    if not EXPECTED.is_file():
+        return result, None, lines
+    expected = json.loads(EXPECTED.read_text(encoding="utf-8"))
+    hashes = {m["label"]: m["sha256"] for m in models}
+    if split != expected["split"] or any(hashes.get(k) != v for k, v in expected["models"].items()):
+        lines.append("기대값 비교 생략: 제출 모델 두 개와 다른 모델이거나 다른 평가셋입니다.")
+        return result, None, lines
+    reference = expected["values"][path]
+    tolerance = expected["tolerance"]
+    rows, ok = [], True
+    for label in expected["models"]:
+        got = metrics[label]
+        for name in ("mean", *CLASSES):
+            value = got["mean_ap40_moderate"] if name == "mean" else got["class_ap40_moderate"][name]
+            want = reference[label][name]
+            good = abs(value - want) <= tolerance
+            ok &= good
+            rows.append(f"| {label} | {name} | {value:.3f} | {want:.3f} | {value - want:+.4f} | {'OK' if good else 'DIFFERENT'} |")
+    check = {"cpu_path": path, "reference": reference["source"], "tolerance": tolerance, "match": ok}
+    lines += [f"비교 기준: {reference['source']} (허용 오차 {tolerance}점)", "",
+              "| 모델 | 클래스 | 이번 실행 | 기대값 | 차이 | 판정 |", "|---|---|---|---|---|---|", *rows, "",
+              "**재현 성공**: 이 CPU 종류의 기대값과 일치합니다." if ok else
+              "**재현 실패**: 기대값과 0.01점 넘게 다릅니다. 이 표를 공유해 주세요."]
+    print(f"\nINT8 path on this CPU: {result['int8_path']} -> expected values: {path}")
+    print("REPRODUCED: accuracy matches the expected values for this CPU type" if ok else
+          "NOT REPRODUCED: accuracy differs from the expected values for this CPU type (see summary.md)")
+    return result, check, lines
+
+
 def main() -> None:
     args = parse_args()
     split_file = SPLITS[args.split]
@@ -345,7 +395,8 @@ def main() -> None:
     if speed_files and missing:
         print(f"WARNING: no speed numbers for {missing}: their SHA-256 is not in {speed['files']}")
 
-    summary_md = build_summary(args.split, models, metrics, speed)
+    probe_result, expected_check, probe_lines = int8_check(args.split, models, metrics)
+    summary_md = build_summary(args.split, models, metrics, speed) + "\n".join(probe_lines) + "\n"
     (output / "summary.md").write_text(summary_md, encoding="utf-8")
     import onnxruntime
 
@@ -355,6 +406,8 @@ def main() -> None:
         "accuracy": {k: {"class_ap40_moderate": v["class_ap40_moderate"],
                          "mean_ap40_moderate": v["mean_ap40_moderate"]} for k, v in metrics.items()},
         "speed": speed,
+        "int8_probe": probe_result,
+        "expected_check": expected_check,
         "versions": {"python": platform.python_version(), "onnxruntime": onnxruntime.__version__},
         "platform": platform.platform(),
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

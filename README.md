@@ -120,7 +120,27 @@ python scripts/run_benchmark.py --kitti-root ~/datasets/KITTI --split eval_val -
 
 ### 6. 기대 출력
 
-`summary.md`의 6.3 정확도 표가 보고서 6.3과 같아야 합니다 (CPU 부동소수점 차이로 ±0.01 이내).
+실행이 끝나면 `summary.md` 맨 아래 「재현 확인」에 **재현 성공 / 재현 실패**가 자동으로 표시됩니다.
+스크립트가 먼저 이 CPU의 INT8 계산 방식을 검사하고(`scripts/int8_probe.py`), 그 CPU 종류의 기대값과 0.01점 이내인지 비교합니다.
+
+#### CPU에 따른 INT8 결과 (중요)
+
+**같은 INT8 모델 파일이라도 CPU에 VNNI 명령어가 있느냐에 따라 정확도가 다르게 나옵니다.** FP32 baseline은 어떤 CPU에서나 같습니다.
+
+| CPU 종류 | 예 | Baseline (FP32) | 최적화 (INT8) | Car / Pedestrian / Cyclist (INT8) |
+|---|---|---|---|---|
+| **VNNI 있음** (보고서 기준) | Intel 12세대 이상(AVX-VNNI), Xeon Cascade Lake 이상·AMD Zen 4(AVX512-VNNI) | 94.08 | **93.71** | 97.95 / 90.86 / 92.31 |
+| VNNI 없음 | AVX2만 있는 CPU (Broadwell·Skylake Xeon, AMD Zen 2/3 등) | 94.08 | 93.05 | 98.03 / 90.03 / 91.09 |
+
+- **이유**: ONNX Runtime은 uint8 활성값 × int8 가중치를 VNNI가 있으면 32비트로 정확히 더하고,
+  없으면 VPMADDUBSW 명령으로 두 곱을 16비트에 더하면서 값이 32,767에서 잘립니다(포화).
+  `python scripts/int8_probe.py`가 255 × 127을 64번 곱해 더해 보는데, VNNI CPU는 정확한 2,072,640,
+  VNNI 없는 CPU는 1,048,544(= 32쌍 × 32,767)를 냅니다.
+- 두 기대값은 같은 모델 파일(SHA-256 일치)로 각각 PC00(i9-12900)과 Google Colab(Xeon @ 2.20GHz, AVX2)에서 얻었습니다:
+  [`results/eval_val_expected_by_cpu.json`](results/eval_val_expected_by_cpu.json), [`results/colab_avx2/`](results/colab_avx2/).
+- 보고서의 INT8 수치는 정확한 계산 경로인 **VNNI 기준**입니다. 본선 장비(Hailo-10H)는 자체 INT8 하드웨어로 실행하므로 이 차이와 무관합니다.
+- VNNI 없는 CPU에서는 INT8 속도 이득도 작게 나옵니다 (예: Colab 2코어에서 1.20배).
+
 6.4의 속도와 메모리는 **측정하는 PC에 따라 달라집니다.** 보고서 수치는 아래 환경에서 측정했습니다.
 
 - Intel i9-12900 (P코어 8 + E코어 8), Windows 11, ONNX Runtime 1.24.4 CPU provider, 4스레드, **P코어 고정**, 2회 측정 평균
@@ -135,6 +155,7 @@ python scripts/run_benchmark.py --kitti-root ~/datasets/KITTI --split eval_val -
 - ONNX Runtime의 INT8 이득은 CPU provider에서 나타납니다. CUDA provider는 INT8 연산 대부분을 float로 되돌려 실행합니다.
 - 내부 검증셋으로만 확인하려면 `--split internal_val`을 씁니다 (`--confirm-final` 불필요).
 - 측정 없이 정확도만 보려면 `--no-speed`를 붙입니다.
+- 내 CPU가 어느 INT8 경로를 쓰는지만 확인하려면 `python scripts/int8_probe.py`를 실행합니다.
 
 ---
 

@@ -1,0 +1,93 @@
+{
+  "split": "eval_val",
+  "split_file": "/content/Please-YE/eval_val.txt",
+  "models": [
+    {
+      "label": "baseline",
+      "role": "baseline",
+      "path": "/content/Please-YE/models/yolo11n_kitti_1248x384_fp32.onnx",
+      "sha256": "f7c13c8484c69965c2698ccacaabe7160b27d1cc68df78b5aa17a6a0184f47b6",
+      "format": "onnx"
+    },
+    {
+      "label": "optimized",
+      "role": "optimized",
+      "path": "/content/Please-YE/models/yolo11n_kitti_1248x384_int8.onnx",
+      "sha256": "2d5477348402719ca713860b9d3bf317d8dbe9f88c2d38fb816286c571565d27",
+      "format": "onnx"
+    }
+  ],
+  "accuracy": {
+    "baseline": {
+      "class_ap40_moderate": {
+        "Car": 98.0752935090747,
+        "Pedestrian": 91.43650814091488,
+        "Cyclist": 92.72014225426946
+      },
+      "mean_ap40_moderate": 94.07731463475301
+    },
+    "optimized": {
+      "class_ap40_moderate": {
+        "Car": 98.0252879183887,
+        "Pedestrian": 90.03213614808553,
+        "Cyclist": 91.09436428489298
+      },
+      "mean_ap40_moderate": 93.0505961171224
+    }
+  },
+  "speed": {
+    "models": {
+      "baseline": {
+        "bytes": 10634414,
+        "mib": 10.141767501831055,
+        "mb": 10.634414,
+        "parameters": 2582737,
+        "gflops": 7.469968896,
+        "latency_median_ms": 376.70393799999147,
+        "latency_mean_ms": 461.7481638649815,
+        "latency_p95_ms": 808.6573089999547,
+        "peak_memory_mib": 180.25390625,
+        "runs_averaged": 1,
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "fps": 2.654604582339202
+      },
+      "optimized": {
+        "bytes": 3265560,
+        "mib": 3.1142807006835938,
+        "mb": 3.26556,
+        "parameters": 2582737,
+        "gflops": 7.469968896,
+        "latency_median_ms": 313.26825499991173,
+        "latency_mean_ms": 352.5909978850018,
+        "latency_p95_ms": 641.5563549999206,
+        "peak_memory_mib": 118.87109375,
+        "runs_averaged": 1,
+        "threads": 4,
+        "warmup": 30,
+        "repeats": 200,
+        "fps": 3.1921523615608027
+      }
+    },
+    "environments": [
+      {
+        "cpu": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+        "logical_cpus": 2,
+        "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+        "python": "3.13.18",
+        "onnxruntime": "1.24.4",
+        "provider": "cpu",
+        "threads": 4
+      }
+    ],
+    "files": [
+      "/content/Please-YE/runs/benchmark/eval_val/speed_benchmark_onnx.json"
+    ]
+  },
+  "versions": {
+    "python": "3.13.18",
+    "onnxruntime": "1.24.4"
+  },
+  "platform": "Linux-6.6.159+-x86_64-with-glibc2.39"
+}

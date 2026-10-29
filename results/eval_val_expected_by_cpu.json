@@ -1,0 +1,52 @@
+{
+  "split": "eval_val",
+  "description": "Expected KITTI Moderate AP40 of the submitted models on eval_val, per CPU INT8 path. FP32 (baseline) is identical on every CPU. ONNX Runtime computes the INT8 model's uint8 x int8 products exactly on CPUs with VNNI and with 16-bit saturation on CPUs without VNNI, so the INT8 model has two reference results. The path is detected with scripts/int8_probe.py.",
+  "models": {
+    "baseline": "f7c13c8484c69965c2698ccacaabe7160b27d1cc68df78b5aa17a6a0184f47b6",
+    "optimized": "2d5477348402719ca713860b9d3bf317d8dbe9f88c2d38fb816286c571565d27"
+  },
+  "tolerance": 0.01,
+  "values": {
+    "vnni": {
+      "source": "results/eval_val_summary.json — PC00, Intel Core i9-12900 (AVX-VNNI), 2026-10-28",
+      "baseline": {
+        "mean": 94.07731463475301,
+        "Car": 98.0752935090747,
+        "Pedestrian": 91.43650814091488,
+        "Cyclist": 92.72014225426946
+      },
+      "optimized": {
+        "mean": 93.71049462451356,
+        "Car": 97.95451004107356,
+        "Pedestrian": 90.86285115583642,
+        "Cyclist": 92.31412267663069
+      }
+    },
+    "no_vnni": {
+      "source": "results/colab_avx2/eval_val_summary.json — Google Colab, Intel Xeon @ 2.20GHz (AVX2, no VNNI), 2026-10-29",
+      "baseline": {
+        "mean": 94.07731463475301,
+        "Car": 98.0752935090747,
+        "Pedestrian": 91.43650814091488,
+        "Cyclist": 92.72014225426946
+      },
+      "optimized": {
+        "mean": 93.0505961171224,
+        "Car": 98.0252879183887,
+        "Pedestrian": 90.03213614808553,
+        "Cyclist": 91.09436428489298
+      }
+    }
+  },
+  "probe_results": {
+    "vnni": {
+      "got": 2072640,
+      "expected_exact": 2072640
+    },
+    "no_vnni": {
+      "got": 1048544,
+      "expected_exact": 2072640,
+      "note": "32 pairs x 32767 (int16 saturation)"
+    }
+  }
+}
