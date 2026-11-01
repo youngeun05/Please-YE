@@ -1,0 +1,656 @@
+{
+  "images": [
+    "000020",
+    "000024",
+    "000028",
+    "000032",
+    "000036",
+    "000045",
+    "000048",
+    "000050",
+    "000058",
+    "000071",
+    "000100",
+    "000109",
+    "000110",
+    "000150",
+    "000152",
+    "000154"
+  ],
+  "sha256": {
+    "fp32": "f7c13c8484c69965c2698ccacaabe7160b27d1cc68df78b5aa17a6a0184f47b6",
+    "int8": "2d5477348402719ca713860b9d3bf317d8dbe9f88c2d38fb816286c571565d27"
+  },
+  "onnxruntime": "1.24.4",
+  "chunk": 4,
+  "float_tensors_saved": 330,
+  "qdq_tensors_saved": 811,
+  "common_names": 330,
+  "float_only_names": [],
+  "matched_qdq_pairs": 306,
+  "matched_with_float": 306,
+  "matched_without_float": [],
+  "unquantized_common_tensors": [
+    "/model.23/Reshape_output_0",
+    "/model.23/Reshape_3_output_0",
+    "/model.23/Reshape_1_output_0",
+    "/model.23/Reshape_4_output_0",
+    "/model.23/Reshape_2_output_0",
+    "/model.23/Concat_output_0",
+    "/model.23/dfl/Reshape_output_0",
+    "/model.23/dfl/Transpose_output_0",
+    "/model.23/dfl/Softmax_output_0",
+    "/model.23/dfl/conv/Conv_output_0",
+    "/model.23/Reshape_5_output_0",
+    "/model.23/dfl/Reshape_1_output_0",
+    "/model.23/Concat_1_output_0",
+    "/model.23/Slice_output_0",
+    "/model.23/Slice_1_output_0",
+    "/model.23/Sigmoid_output_0",
+    "/model.23/Sub_output_0",
+    "/model.23/Add_1_output_0",
+    "/model.23/Add_2_output_0",
+    "/model.23/Sub_1_output_0",
+    "/model.23/Div_1_output_0",
+    "/model.23/Concat_2_output_0",
+    "/model.23/Mul_2_output_0",
+    "output0"
+  ],
+  "equivalence_check_chunk0": {
+    "tensors": 306,
+    "max_abs_diff_db": 0.0025347349346560577
+  },
+  "weights_matched": 175,
+  "weight_dq_nodes_in_int8": 175,
+  "lowest_xmodel": [
+    {
+      "tensor": "/model.10/m/m.0/attn/Softmax_output_0",
+      "producer_node": "/model.10/m/m.0/attn/Softmax",
+      "block": 10,
+      "part": "backbone",
+      "xmodel_err_db": 13.55,
+      "qdq_err_db": 16.92
+    },
+    {
+      "tensor": "/model.10/m/m.0/attn/Transpose_1_output_0",
+      "producer_node": "/model.10/m/m.0/attn/Transpose_1",
+      "block": 10,
+      "part": "backbone",
+      "xmodel_err_db": 13.55,
+      "qdq_err_db": 337.12
+    },
+    {
+      "tensor": "/model.22/m.0/cv2/act/Mul_output_0",
+      "producer_node": "/model.22/m.0/cv2/act/Mul",
+      "block": 22,
+      "part": "neck",
+      "xmodel_err_db": 14.47,
+      "qdq_err_db": 24.16
+    },
+    {
+      "tensor": "/model.23/cv3.2/cv3.2.1/cv3.2.1.0/conv/Conv_output_0",
+      "producer_node": "/model.23/cv3.2/cv3.2.1/cv3.2.1.0/conv/Conv",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "xmodel_err_db": 14.53,
+      "qdq_err_db": 26.63
+    },
+    {
+      "tensor": "/model.23/cv3.2/cv3.2.1/cv3.2.1.0/act/Mul_output_0",
+      "producer_node": "/model.23/cv3.2/cv3.2.1/cv3.2.1.0/act/Mul",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "xmodel_err_db": 14.59,
+      "qdq_err_db": 32.26
+    },
+    {
+      "tensor": "/model.23/cv3.0/cv3.0.1/cv3.0.1.0/conv/Conv_output_0",
+      "producer_node": "/model.23/cv3.0/cv3.0.1/cv3.0.1.0/conv/Conv",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "xmodel_err_db": 14.73,
+      "qdq_err_db": 29.94
+    },
+    {
+      "tensor": "/model.10/m/m.0/ffn/ffn.1/conv/Conv_output_0",
+      "producer_node": "/model.10/m/m.0/ffn/ffn.1/conv/Conv",
+      "block": 10,
+      "part": "backbone",
+      "xmodel_err_db": 14.94,
+      "qdq_err_db": 27.66
+    },
+    {
+      "tensor": "/model.23/cv3.2/cv3.2.0/cv3.2.0.0/act/Mul_output_0",
+      "producer_node": "/model.23/cv3.2/cv3.2.0/cv3.2.0.0/act/Mul",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "xmodel_err_db": 14.99,
+      "qdq_err_db": 31.01
+    },
+    {
+      "tensor": "/model.23/cv3.0/cv3.0.1/cv3.0.1.0/act/Mul_output_0",
+      "producer_node": "/model.23/cv3.0/cv3.0.1/cv3.0.1.0/act/Mul",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "xmodel_err_db": 15.0,
+      "qdq_err_db": 33.22
+    },
+    {
+      "tensor": "/model.23/cv3.2/cv3.2.0/cv3.2.0.0/conv/Conv_output_0",
+      "producer_node": "/model.23/cv3.2/cv3.2.0/cv3.2.0.0/conv/Conv",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "xmodel_err_db": 15.21,
+      "qdq_err_db": 25.88
+    }
+  ],
+  "lowest_qdq": [
+    {
+      "tensor": "/model.10/m/m.0/attn/Softmax_output_0",
+      "block": 10,
+      "part": "backbone",
+      "qdq_err_db": 16.92,
+      "xmodel_err_db": 13.55,
+      "clipped_frac": 0.0
+    },
+    {
+      "tensor": "/model.22/m.0/cv2/act/Mul_output_0",
+      "block": 22,
+      "part": "neck",
+      "qdq_err_db": 24.16,
+      "xmodel_err_db": 14.47,
+      "clipped_frac": 0.0
+    },
+    {
+      "tensor": "/model.22/m.0/cv2/conv/Conv_output_0",
+      "block": 22,
+      "part": "neck",
+      "qdq_err_db": 25.73,
+      "xmodel_err_db": 16.83,
+      "clipped_frac": 4.1733440170940175e-06
+    },
+    {
+      "tensor": "/model.23/cv3.2/cv3.2.0/cv3.2.0.0/conv/Conv_output_0",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "qdq_err_db": 25.88,
+      "xmodel_err_db": 15.21,
+      "clipped_frac": 1.3041700053418803e-05
+    },
+    {
+      "tensor": "/model.23/cv3.2/cv3.2.1/cv3.2.1.0/conv/Conv_output_0",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "qdq_err_db": 26.63,
+      "xmodel_err_db": 14.53,
+      "clipped_frac": 8.346688034188035e-06
+    },
+    {
+      "tensor": "/model.23/cv3.1/cv3.1.1/cv3.1.1.0/conv/Conv_output_0",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "qdq_err_db": 27.34,
+      "xmodel_err_db": 15.42,
+      "clipped_frac": 1.1998364049145299e-05
+    },
+    {
+      "tensor": "/model.10/m/m.0/ffn/ffn.1/conv/Conv_output_0",
+      "block": 10,
+      "part": "backbone",
+      "qdq_err_db": 27.66,
+      "xmodel_err_db": 14.94,
+      "clipped_frac": 0.0
+    },
+    {
+      "tensor": "/model.23/cv3.1/cv3.1.1/cv3.1.1.1/conv/Conv_output_0",
+      "block": 23,
+      "part": "head-cls(cv3)",
+      "qdq_err_db": 28.84,
+      "xmodel_err_db": 16.5,
+      "clipped_frac": 6.781684027777777e-06
+    },
+    {
+      "tensor": "/model.22/cv1/act/Mul_output_0",
+      "block": 22,
+      "part": "neck",
+      "qdq_err_db": 29.2,
+      "xmodel_err_db": 15.58,
+      "clipped_frac": 9.390024038461539e-06
+    },
+    {
+      "tensor": "/model.1/conv/Conv_output_0",
+      "block": 1,
+      "part": "backbone",
+      "qdq_err_db": 29.47,
+      "xmodel_err_db": 24.78,
+      "clipped_frac": 6.716475527510684e-06
+    }
+  ],
+  "blocks": [
+    {
+      "block": 0,
+      "first_op": "Conv",
+      "output_tensors": "/model.0/act/Mul_output_0",
+      "xmodel_err_out_db": 29.99,
+      "input_tensors": "images",
+      "xmodel_err_in_min_db": 66.23,
+      "delta_db": -36.24,
+      "n_tensors_in_block": 3,
+      "min_qdq_err_in_block_db": 34.79
+    },
+    {
+      "block": 1,
+      "first_op": "Conv",
+      "output_tensors": "/model.1/act/Mul_output_0",
+      "xmodel_err_out_db": 24.47,
+      "input_tensors": "/model.0/act/Mul_output_0",
+      "xmodel_err_in_min_db": 29.99,
+      "delta_db": -5.52,
+      "n_tensors_in_block": 3,
+      "min_qdq_err_in_block_db": 29.47
+    },
+    {
+      "block": 2,
+      "first_op": "Conv",
+      "output_tensors": "/model.2/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 18.47,
+      "input_tensors": "/model.1/act/Mul_output_0",
+      "xmodel_err_in_min_db": 24.47,
+      "delta_db": -6.0,
+      "n_tensors_in_block": 16,
+      "min_qdq_err_in_block_db": 29.99
+    },
+    {
+      "block": 3,
+      "first_op": "Conv",
+      "output_tensors": "/model.3/act/Mul_output_0",
+      "xmodel_err_out_db": 22.54,
+      "input_tensors": "/model.2/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 18.47,
+      "delta_db": 4.07,
+      "n_tensors_in_block": 3,
+      "min_qdq_err_in_block_db": 37.14
+    },
+    {
+      "block": 4,
+      "first_op": "Conv",
+      "output_tensors": "/model.4/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 19.74,
+      "input_tensors": "/model.3/act/Mul_output_0",
+      "xmodel_err_in_min_db": 22.54,
+      "delta_db": -2.8,
+      "n_tensors_in_block": 16,
+      "min_qdq_err_in_block_db": 35.69
+    },
+    {
+      "block": 5,
+      "first_op": "Conv",
+      "output_tensors": "/model.5/act/Mul_output_0",
+      "xmodel_err_out_db": 22.89,
+      "input_tensors": "/model.4/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 19.74,
+      "delta_db": 3.15,
+      "n_tensors_in_block": 3,
+      "min_qdq_err_in_block_db": 36.95
+    },
+    {
+      "block": 6,
+      "first_op": "Conv",
+      "output_tensors": "/model.6/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 20.05,
+      "input_tensors": "/model.5/act/Mul_output_0",
+      "xmodel_err_in_min_db": 22.89,
+      "delta_db": -2.84,
+      "n_tensors_in_block": 33,
+      "min_qdq_err_in_block_db": 33.61
+    },
+    {
+      "block": 7,
+      "first_op": "Conv",
+      "output_tensors": "/model.7/act/Mul_output_0",
+      "xmodel_err_out_db": 20.58,
+      "input_tensors": "/model.6/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 20.05,
+      "delta_db": 0.53,
+      "n_tensors_in_block": 3,
+      "min_qdq_err_in_block_db": 35.27
+    },
+    {
+      "block": 8,
+      "first_op": "Conv",
+      "output_tensors": "/model.8/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 21.45,
+      "input_tensors": "/model.7/act/Mul_output_0",
+      "xmodel_err_in_min_db": 20.58,
+      "delta_db": 0.87,
+      "n_tensors_in_block": 33,
+      "min_qdq_err_in_block_db": 32.92
+    },
+    {
+      "block": 9,
+      "first_op": "Conv",
+      "output_tensors": "/model.9/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 21.28,
+      "input_tensors": "/model.8/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 21.45,
+      "delta_db": -0.17,
+      "n_tensors_in_block": 8,
+      "min_qdq_err_in_block_db": 36.56
+    },
+    {
+      "block": 10,
+      "first_op": "Conv",
+      "output_tensors": "/model.10/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 17.29,
+      "input_tensors": "/model.9/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 21.28,
+      "delta_db": -3.99,
+      "n_tensors_in_block": 31,
+      "min_qdq_err_in_block_db": 16.92
+    },
+    {
+      "block": 11,
+      "first_op": "Resize",
+      "output_tensors": "/model.11/Resize_output_0",
+      "xmodel_err_out_db": 17.29,
+      "input_tensors": "/model.10/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 17.29,
+      "delta_db": 0.0,
+      "n_tensors_in_block": 1,
+      "min_qdq_err_in_block_db": 371.98
+    },
+    {
+      "block": 12,
+      "first_op": "Concat",
+      "output_tensors": "/model.12/Concat_output_0",
+      "xmodel_err_out_db": 18.39,
+      "input_tensors": "/model.11/Resize_output_0;/model.6/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 17.29,
+      "delta_db": 1.1,
+      "n_tensors_in_block": 1,
+      "min_qdq_err_in_block_db": 35.44
+    },
+    {
+      "block": 13,
+      "first_op": "Conv",
+      "output_tensors": "/model.13/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 18.29,
+      "input_tensors": "/model.12/Concat_output_0",
+      "xmodel_err_in_min_db": 18.39,
+      "delta_db": -0.1,
+      "n_tensors_in_block": 16,
+      "min_qdq_err_in_block_db": 34.21
+    },
+    {
+      "block": 14,
+      "first_op": "Resize",
+      "output_tensors": "/model.14/Resize_output_0",
+      "xmodel_err_out_db": 18.29,
+      "input_tensors": "/model.13/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 18.29,
+      "delta_db": 0.0,
+      "n_tensors_in_block": 1,
+      "min_qdq_err_in_block_db": 375.01
+    },
+    {
+      "block": 15,
+      "first_op": "Concat",
+      "output_tensors": "/model.15/Concat_output_0",
+      "xmodel_err_out_db": 18.91,
+      "input_tensors": "/model.14/Resize_output_0;/model.4/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 18.29,
+      "delta_db": 0.62,
+      "n_tensors_in_block": 1,
+      "min_qdq_err_in_block_db": 35.73
+    },
+    {
+      "block": 16,
+      "first_op": "Conv",
+      "output_tensors": "/model.16/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 21.85,
+      "input_tensors": "/model.15/Concat_output_0",
+      "xmodel_err_in_min_db": 18.91,
+      "delta_db": 2.94,
+      "n_tensors_in_block": 16,
+      "min_qdq_err_in_block_db": 35.69
+    },
+    {
+      "block": 17,
+      "first_op": "Conv",
+      "output_tensors": "/model.17/act/Mul_output_0",
+      "xmodel_err_out_db": 17.69,
+      "input_tensors": "/model.16/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 21.85,
+      "delta_db": -4.16,
+      "n_tensors_in_block": 3,
+      "min_qdq_err_in_block_db": 34.04
+    },
+    {
+      "block": 18,
+      "first_op": "Concat",
+      "output_tensors": "/model.18/Concat_output_0",
+      "xmodel_err_out_db": 17.81,
+      "input_tensors": "/model.13/cv2/act/Mul_output_0;/model.17/act/Mul_output_0",
+      "xmodel_err_in_min_db": 17.69,
+      "delta_db": 0.12,
+      "n_tensors_in_block": 1,
+      "min_qdq_err_in_block_db": 32.7
+    },
+    {
+      "block": 19,
+      "first_op": "Conv",
+      "output_tensors": "/model.19/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 18.52,
+      "input_tensors": "/model.18/Concat_output_0",
+      "xmodel_err_in_min_db": 17.81,
+      "delta_db": 0.71,
+      "n_tensors_in_block": 16,
+      "min_qdq_err_in_block_db": 32.85
+    },
+    {
+      "block": 20,
+      "first_op": "Conv",
+      "output_tensors": "/model.20/act/Mul_output_0",
+      "xmodel_err_out_db": 17.11,
+      "input_tensors": "/model.19/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 18.52,
+      "delta_db": -1.41,
+      "n_tensors_in_block": 3,
+      "min_qdq_err_in_block_db": 32.01
+    },
+    {
+      "block": 21,
+      "first_op": "Concat",
+      "output_tensors": "/model.21/Concat_output_0",
+      "xmodel_err_out_db": 17.06,
+      "input_tensors": "/model.10/cv2/act/Mul_output_0;/model.20/act/Mul_output_0",
+      "xmodel_err_in_min_db": 17.11,
+      "delta_db": -0.05,
+      "n_tensors_in_block": 1,
+      "min_qdq_err_in_block_db": 31.7
+    },
+    {
+      "block": 22,
+      "first_op": "Conv",
+      "output_tensors": "/model.22/cv2/act/Mul_output_0",
+      "xmodel_err_out_db": 15.28,
+      "input_tensors": "/model.21/Concat_output_0",
+      "xmodel_err_in_min_db": 17.06,
+      "delta_db": -1.78,
+      "n_tensors_in_block": 33,
+      "min_qdq_err_in_block_db": 24.16
+    },
+    {
+      "block": 23,
+      "first_op": "Conv",
+      "output_tensors": "output0",
+      "xmodel_err_out_db": 37.96,
+      "input_tensors": "/model.16/cv2/act/Mul_output_0;/model.19/cv2/act/Mul_output_0;/model.22/cv2/act/Mul_output_0",
+      "xmodel_err_in_min_db": 15.28,
+      "delta_db": 22.68,
+      "n_tensors_in_block": 84,
+      "min_qdq_err_in_block_db": 25.88
+    }
+  ],
+  "head_last_convs": {
+    "P3_box": {
+      "tensor": "/model.23/cv2.0/cv2.0.2/Conv_output_0",
+      "xmodel_err_db": 21.24,
+      "qdq_err_db": 39.4,
+      "clipped_frac": 7.564186030982906e-06,
+      "act_range": [
+        -32.2076,
+        31.956
+      ]
+    },
+    "P3_cls": {
+      "tensor": "/model.23/cv3.0/cv3.0.2/Conv_output_0",
+      "xmodel_err_db": 29.19,
+      "qdq_err_db": 48.53,
+      "clipped_frac": 0.0,
+      "act_range": [
+        -62.113,
+        3.0673
+      ]
+    },
+    "P4_box": {
+      "tensor": "/model.23/cv2.1/cv2.1.2/Conv_output_0",
+      "xmodel_err_db": 23.13,
+      "qdq_err_db": 41.74,
+      "clipped_frac": 4.6950120192307695e-06,
+      "act_range": [
+        -26.0818,
+        19.7862
+      ]
+    },
+    "P4_cls": {
+      "tensor": "/model.23/cv3.1/cv3.1.2/Conv_output_0",
+      "xmodel_err_db": 26.69,
+      "qdq_err_db": 45.29,
+      "clipped_frac": 0.0,
+      "act_range": [
+        -90.5077,
+        2.9314
+      ]
+    },
+    "P5_box": {
+      "tensor": "/model.23/cv2.2/cv2.2.2/Conv_output_0",
+      "xmodel_err_db": 24.99,
+      "qdq_err_db": 44.8,
+      "clipped_frac": 1.8780048076923078e-05,
+      "act_range": [
+        -20.7474,
+        13.3854
+      ]
+    },
+    "P5_cls": {
+      "tensor": "/model.23/cv3.2/cv3.2.2/Conv_output_0",
+      "xmodel_err_db": 25.27,
+      "qdq_err_db": 45.71,
+      "clipped_frac": 0.0,
+      "act_range": [
+        -77.4283,
+        3.4906
+      ]
+    }
+  },
+  "output0_qdq_simulation": {
+    "all": 37.96,
+    "box_rows": 37.96,
+    "cls_rows": 20.52,
+    "qdq_in_int8": "no"
+  },
+  "output0_deployed_int8_kernels": {
+    "all": {
+      "int8_kernels_vs_fp32_db": 38.1,
+      "int8_kernels_vs_qdq_simulation_db": 43.78
+    },
+    "box": {
+      "int8_kernels_vs_fp32_db": 38.1,
+      "int8_kernels_vs_qdq_simulation_db": 43.78
+    },
+    "cls": {
+      "int8_kernels_vs_fp32_db": 19.51,
+      "int8_kernels_vs_qdq_simulation_db": 24.51
+    }
+  },
+  "lowest_weights": [
+    {
+      "weight": "model.23.cv2.2.0.conv.weight",
+      "kind": "weight",
+      "node": "/model.23/cv2.2/cv2.2.0/conv/Conv",
+      "shape": "64x256x3x3",
+      "sqnr_db": 36.41,
+      "block": 23
+    },
+    {
+      "weight": "model.23.cv2.2.1.conv.weight",
+      "kind": "weight",
+      "node": "/model.23/cv2.2/cv2.2.1/conv/Conv",
+      "shape": "64x64x3x3",
+      "sqnr_db": 37.11,
+      "block": 23
+    },
+    {
+      "weight": "model.23.cv2.1.1.conv.weight",
+      "kind": "weight",
+      "node": "/model.23/cv2.1/cv2.1.1/conv/Conv",
+      "shape": "64x64x3x3",
+      "sqnr_db": 37.41,
+      "block": 23
+    },
+    {
+      "weight": "model.23.cv2.1.0.conv.weight",
+      "kind": "weight",
+      "node": "/model.23/cv2.1/cv2.1.0/conv/Conv",
+      "shape": "64x128x3x3",
+      "sqnr_db": 37.82,
+      "block": 23
+    },
+    {
+      "weight": "model.23.cv2.0.1.conv.weight",
+      "kind": "weight",
+      "node": "/model.23/cv2.0/cv2.0.1/conv/Conv",
+      "shape": "64x64x3x3",
+      "sqnr_db": 38.65,
+      "block": 23
+    }
+  ],
+  "lowest_biases": [
+    {
+      "weight": "model.10.m.0.attn.pe.conv.bias",
+      "kind": "bias",
+      "node": "/model.10/m/m.0/attn/pe/conv/Conv",
+      "shape": "128",
+      "sqnr_db": 60.99,
+      "block": 10
+    },
+    {
+      "weight": "model.23.cv3.0.1.0.conv.bias",
+      "kind": "bias",
+      "node": "/model.23/cv3.0/cv3.0.1/cv3.0.1.0/conv/Conv",
+      "shape": "64",
+      "sqnr_db": 72.78,
+      "block": 23
+    },
+    {
+      "weight": "model.23.cv3.1.1.0.conv.bias",
+      "kind": "bias",
+      "node": "/model.23/cv3.1/cv3.1.1/cv3.1.1.0/conv/Conv",
+      "shape": "64",
+      "sqnr_db": 73.02,
+      "block": 23
+    }
+  ],
+  "scalar_initializers": [
+    {
+      "weight": "/model.10/m/m.0/attn/Constant_1_output_0",
+      "kind": "scalar",
+      "node": "/model.10/m/m.0/attn/Mul",
+      "shape": "1",
+      "sqnr_db": 298.02,
+      "block": 10
+    }
+  ],
+  "seconds": 37.4
+}

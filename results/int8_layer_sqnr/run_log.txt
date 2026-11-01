@@ -1,0 +1,148 @@
+﻿onnxruntime 1.24.4, onnx 1.23.2, numpy 2.4.6
+sha256 {'fp32': 'f7c13c8484c69965c2698ccacaabe7160b27d1cc68df78b5aa17a6a0184f47b6', 'int8': '2d5477348402719ca713860b9d3bf317d8dbe9f88c2d38fb816286c571565d27'}
+images: 16 first ids of internal_val (000020..000154), input images [1, 3, 384, 1248], chunk 4
+augmented models written (0s)
+  calibrated 4/4 images (1s)
+  calibrated 4/4 images (0s)
+equivalence check (chunk 0, official compute_activation_error vs accumulated): {'tensors': 306, 'max_abs_diff_db': 0.0025347349346560577}
+chunk 1/4 done (10s)
+  calibrated 4/4 images (1s)
+  calibrated 4/4 images (0s)
+chunk 2/4 done (8s)
+  calibrated 4/4 images (1s)
+  calibrated 4/4 images (0s)
+chunk 3/4 done (9s)
+  calibrated 4/4 images (1s)
+  calibrated 4/4 images (0s)
+chunk 4/4 done (8s)
+  calibrated 16/16 images (1s)
+
+matched QDQ pairs: 306 (with FP32 counterpart: 306); FP32 float tensors 330, same-name in INT8 330, unquantized 24
+
+10 lowest xmodel_err (accumulated):
+    13.55 dB  qdq  16.92  [10 backbone]  /model.10/m/m.0/attn/Softmax_output_0
+    13.55 dB  qdq 337.12  [10 backbone]  /model.10/m/m.0/attn/Transpose_1_output_0
+    14.47 dB  qdq  24.16  [22 neck]  /model.22/m.0/cv2/act/Mul_output_0
+    14.53 dB  qdq  26.63  [23 head-cls(cv3)]  /model.23/cv3.2/cv3.2.1/cv3.2.1.0/conv/Conv_output_0
+    14.59 dB  qdq  32.26  [23 head-cls(cv3)]  /model.23/cv3.2/cv3.2.1/cv3.2.1.0/act/Mul_output_0
+    14.73 dB  qdq  29.94  [23 head-cls(cv3)]  /model.23/cv3.0/cv3.0.1/cv3.0.1.0/conv/Conv_output_0
+    14.94 dB  qdq  27.66  [10 backbone]  /model.10/m/m.0/ffn/ffn.1/conv/Conv_output_0
+    14.99 dB  qdq  31.01  [23 head-cls(cv3)]  /model.23/cv3.2/cv3.2.0/cv3.2.0.0/act/Mul_output_0
+    15.00 dB  qdq  33.22  [23 head-cls(cv3)]  /model.23/cv3.0/cv3.0.1/cv3.0.1.0/act/Mul_output_0
+    15.21 dB  qdq  25.88  [23 head-cls(cv3)]  /model.23/cv3.2/cv3.2.0/cv3.2.0.0/conv/Conv_output_0
+
+10 lowest qdq_err (own quantization):
+    16.92 dB  x  13.55  clip 0.00e+00  [10 backbone]  /model.10/m/m.0/attn/Softmax_output_0
+    24.16 dB  x  14.47  clip 0.00e+00  [22 neck]  /model.22/m.0/cv2/act/Mul_output_0
+    25.73 dB  x  16.83  clip 4.17e-06  [22 neck]  /model.22/m.0/cv2/conv/Conv_output_0
+    25.88 dB  x  15.21  clip 1.30e-05  [23 head-cls(cv3)]  /model.23/cv3.2/cv3.2.0/cv3.2.0.0/conv/Conv_output_0
+    26.63 dB  x  14.53  clip 8.35e-06  [23 head-cls(cv3)]  /model.23/cv3.2/cv3.2.1/cv3.2.1.0/conv/Conv_output_0
+    27.34 dB  x  15.42  clip 1.20e-05  [23 head-cls(cv3)]  /model.23/cv3.1/cv3.1.1/cv3.1.1.0/conv/Conv_output_0
+    27.66 dB  x  14.94  clip 0.00e+00  [10 backbone]  /model.10/m/m.0/ffn/ffn.1/conv/Conv_output_0
+    28.84 dB  x  16.50  clip 6.78e-06  [23 head-cls(cv3)]  /model.23/cv3.1/cv3.1.1/cv3.1.1.1/conv/Conv_output_0
+    29.20 dB  x  15.58  clip 9.39e-06  [22 neck]  /model.22/cv1/act/Mul_output_0
+    29.47 dB  x  24.78  clip 6.72e-06  [ 1 backbone]  /model.1/conv/Conv_output_0
+
+block outputs (xmodel_err, dB):
+  model.0  Conv     out  29.99  in(min)  66.23  delta -36.24  minQDQ  34.79  /model.0/act/Mul_output_0
+  model.1  Conv     out  24.47  in(min)  29.99  delta  -5.52  minQDQ  29.47  /model.1/act/Mul_output_0
+  model.2  Conv     out  18.47  in(min)  24.47  delta  -6.00  minQDQ  29.99  /model.2/cv2/act/Mul_output_0
+  model.3  Conv     out  22.54  in(min)  18.47  delta   4.07  minQDQ  37.14  /model.3/act/Mul_output_0
+  model.4  Conv     out  19.74  in(min)  22.54  delta  -2.80  minQDQ  35.69  /model.4/cv2/act/Mul_output_0
+  model.5  Conv     out  22.89  in(min)  19.74  delta   3.15  minQDQ  36.95  /model.5/act/Mul_output_0
+  model.6  Conv     out  20.05  in(min)  22.89  delta  -2.84  minQDQ  33.61  /model.6/cv2/act/Mul_output_0
+  model.7  Conv     out  20.58  in(min)  20.05  delta   0.53  minQDQ  35.27  /model.7/act/Mul_output_0
+  model.8  Conv     out  21.45  in(min)  20.58  delta   0.87  minQDQ  32.92  /model.8/cv2/act/Mul_output_0
+  model.9  Conv     out  21.28  in(min)  21.45  delta  -0.17  minQDQ  36.56  /model.9/cv2/act/Mul_output_0
+  model.10 Conv     out  17.29  in(min)  21.28  delta  -3.99  minQDQ  16.92  /model.10/cv2/act/Mul_output_0
+  model.11 Resize   out  17.29  in(min)  17.29  delta   0.00  minQDQ 371.98  /model.11/Resize_output_0
+  model.12 Concat   out  18.39  in(min)  17.29  delta   1.10  minQDQ  35.44  /model.12/Concat_output_0
+  model.13 Conv     out  18.29  in(min)  18.39  delta  -0.10  minQDQ  34.21  /model.13/cv2/act/Mul_output_0
+  model.14 Resize   out  18.29  in(min)  18.29  delta   0.00  minQDQ 375.01  /model.14/Resize_output_0
+  model.15 Concat   out  18.91  in(min)  18.29  delta   0.62  minQDQ  35.73  /model.15/Concat_output_0
+  model.16 Conv     out  21.85  in(min)  18.91  delta   2.94  minQDQ  35.69  /model.16/cv2/act/Mul_output_0
+  model.17 Conv     out  17.69  in(min)  21.85  delta  -4.16  minQDQ  34.04  /model.17/act/Mul_output_0
+  model.18 Concat   out  17.81  in(min)  17.69  delta   0.12  minQDQ  32.70  /model.18/Concat_output_0
+  model.19 Conv     out  18.52  in(min)  17.81  delta   0.71  minQDQ  32.85  /model.19/cv2/act/Mul_output_0
+  model.20 Conv     out  17.11  in(min)  18.52  delta  -1.41  minQDQ  32.01  /model.20/act/Mul_output_0
+  model.21 Concat   out  17.06  in(min)  17.11  delta  -0.05  minQDQ  31.70  /model.21/Concat_output_0
+  model.22 Conv     out  15.28  in(min)  17.06  delta  -1.78  minQDQ  24.16  /model.22/cv2/act/Mul_output_0
+  model.23 Conv     out  37.96  in(min)  15.28  delta  22.68  minQDQ  25.88  output0
+
+head last convs: {
+ "P3_box": {
+  "tensor": "/model.23/cv2.0/cv2.0.2/Conv_output_0",
+  "xmodel_err_db": 21.24,
+  "qdq_err_db": 39.4,
+  "clipped_frac": 7.564186030982906e-06,
+  "act_range": [
+   -32.2076,
+   31.956
+  ]
+ },
+ "P3_cls": {
+  "tensor": "/model.23/cv3.0/cv3.0.2/Conv_output_0",
+  "xmodel_err_db": 29.19,
+  "qdq_err_db": 48.53,
+  "clipped_frac": 0.0,
+  "act_range": [
+   -62.113,
+   3.0673
+  ]
+ },
+ "P4_box": {
+  "tensor": "/model.23/cv2.1/cv2.1.2/Conv_output_0",
+  "xmodel_err_db": 23.13,
+  "qdq_err_db": 41.74,
+  "clipped_frac": 4.6950120192307695e-06,
+  "act_range": [
+   -26.0818,
+   19.7862
+  ]
+ },
+ "P4_cls": {
+  "tensor": "/model.23/cv3.1/cv3.1.2/Conv_output_0",
+  "xmodel_err_db": 26.69,
+  "qdq_err_db": 45.29,
+  "clipped_frac": 0.0,
+  "act_range": [
+   -90.5077,
+   2.9314
+  ]
+ },
+ "P5_box": {
+  "tensor": "/model.23/cv2.2/cv2.2.2/Conv_output_0",
+  "xmodel_err_db": 24.99,
+  "qdq_err_db": 44.8,
+  "clipped_frac": 1.8780048076923078e-05,
+  "act_range": [
+   -20.7474,
+   13.3854
+  ]
+ },
+ "P5_cls": {
+  "tensor": "/model.23/cv3.2/cv3.2.2/Conv_output_0",
+  "xmodel_err_db": 25.27,
+  "qdq_err_db": 45.71,
+  "clipped_frac": 0.0,
+  "act_range": [
+   -77.4283,
+   3.4906
+  ]
+ }
+}
+output0 (QDQ simulation): {'all': 37.96, 'box_rows': 37.96, 'cls_rows': 20.52, 'qdq_in_int8': 'no'}
+output0 (deployed INT8 kernels): {'all': {'int8_kernels_vs_fp32_db': 38.1, 'int8_kernels_vs_qdq_simulation_db': 43.78}, 'box': {'int8_kernels_vs_fp32_db': 38.1, 'int8_kernels_vs_qdq_simulation_db': 43.78}, 'cls': {'int8_kernels_vs_fp32_db': 19.51, 'int8_kernels_vs_qdq_simulation_db': 24.51}}
+
+weights matched 175 of 175 DQ-on-initializer nodes
+    36.41 dB  weight 64x256x3x3     model.23.cv2.2.0.conv.weight  (/model.23/cv2.2/cv2.2.0/conv/Conv)
+    37.11 dB  weight 64x64x3x3      model.23.cv2.2.1.conv.weight  (/model.23/cv2.2/cv2.2.1/conv/Conv)
+    37.41 dB  weight 64x64x3x3      model.23.cv2.1.1.conv.weight  (/model.23/cv2.1/cv2.1.1/conv/Conv)
+    37.82 dB  weight 64x128x3x3     model.23.cv2.1.0.conv.weight  (/model.23/cv2.1/cv2.1.0/conv/Conv)
+    38.65 dB  weight 64x64x3x3      model.23.cv2.0.1.conv.weight  (/model.23/cv2.0/cv2.0.1/conv/Conv)
+    60.99 dB  bias   128            model.10.m.0.attn.pe.conv.bias  (/model.10/m/m.0/attn/pe/conv/Conv)
+    72.78 dB  bias   64             model.23.cv3.0.1.0.conv.bias  (/model.23/cv3.0/cv3.0.1/cv3.0.1.0/conv/Conv)
+    73.02 dB  bias   64             model.23.cv3.1.1.0.conv.bias  (/model.23/cv3.1/cv3.1.1/cv3.1.1.0/conv/Conv)
+   298.02 dB  scalar 1              /model.10/m/m.0/attn/Constant_1_output_0  (/model.10/m/m.0/attn/Mul)
+
+done in 37.4s -> <scratchpad>\layer_loss
